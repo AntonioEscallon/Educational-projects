@@ -21,7 +21,11 @@ public class Date {
    // You should review what constructors are, if you do not understand
    // this constructor definition.
    public Date(int newMonth, int newDay, int newYear) {
-      Object testing = 4;
+
+      this.month = newMonth;
+      this.day = newDay;
+      this.year = newYear;
+      
    }
    
    // Observers - discussed in the first chapter.
