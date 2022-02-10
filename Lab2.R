@@ -1,0 +1,146 @@
+require(raster)
+require(here)
+#Q1:A plot of the original 6 by 6 raster. ----
+#Plots of resampled rasters of various dimensions. 
+#You should include as many figures as you need to help 
+#illustrate your answer to the next questions.
+
+#Q2: Explain your intuitive understanding of what happens when ----
+#you resample raster data to dimensions that are not whole 
+#number multiples of the original.
+#Specifically address what happens when you make rasters with 
+#coarser and finer grains from the original. You should reference 
+#the figures you included in the first question.
+
+#Q3: Explain what happened when you tried to recover your ----
+#original 6 by 6 raster. Make sure you explain why your end product does 
+#or does not look like your starting raster. Include at least one figure 
+#to illustrate your answer.
+
+#Q4: Propose one or more strategies to minimize distortions.
+
+#Q5: Identify at least one good reason for using simulated data when you’re 
+#learning new concepts or techniques.
+
+dat_dir = here("data", "Fletcher_Fortin-2018-Supporting_Files", "data")
+nlcd = raster(file.path(dat_dir, "nlcd2011SE.nc"))
+
+#Creating the first template raster
+raster_temp <- raster(ncol=6, nrow=6, xmn=1, xmx=6, ymn=1, ymx=6)
+raster_temp[] <- rpois(ncell(raster_temp), lambda=3)
+plot(raster_temp, axes=F, box=F)
+
+#Creating a second template raster
+rast_6 <- raster(ncol=6, nrow=6, xmn=1, xmx=6, ymn=1, ymx=6)
+rast_6[] <- rpois(ncell(raster_temp), lambda=10)
+plot(rast_6, axes=F, box=F)
+text(toy2, digits=2)
+dev.copy2pdf(file="raster_6.pdf", width = 7, height = 5)
+
+#Creating a second template raster
+rast_7 <- raster(ncol=7, nrow=7, xmn = 1, xmx = 6, ymn = 1, ymx = 6)
+rast_7[] <- rpois(ncell(raster_temp), lambda=10)
+plot(rast_7, axes=F, box=F)
+
+
+temp1 = resample(rast_6, rast_7)
+plot(temp1, axes=F, box= F)
+dev.copy2pdf(file="raster_7.pdf", width = 7, height = 5)
+temp11 = rast_templ(11,11)
+temp2 = resample(rast_6, temp11)
+plot(temp2, axes = F, box = F)
+dev.copy2pdf(file="raster_11.pdf", width = 7, height = 5)
+plot(rast_6)
+plot(rast_7)
+temp5 = rast_templ(5,5)
+temp3 = resample(rast_6, temp5)
+plot(temp3, axes = F, box = F)
+dev.copy2pdf(file="raster_5.pdf", width = 7, height = 5)
+
+temp60 = resample(temp3, rast_6)
+plot(temp60, axes = F, box = F)
+dev.copy2pdf(file="raster_Rec.pdf", width = 7, height = 5)
+
+temp61 = resample(temp2, rast_6)
+plot(temp61, axes = F, box = F)
+dev.copy2pdf(file="raster_Rec2.pdf", width = 7, height = 5)
+
+#Building a template raster
+rast_templ = function(nrows, ncols, xmn = 1, xmx = 6, ymn = 1, ymx = 6)
+{
+  return(raster(
+    ncol = ncols, nrow = nrows, 
+    xmx = xmx, xmn = xmn, 
+    ymx = ymx, ymn = ymn))
+}
+
+template1= rast_templ(5, 5)
+template1[] <- rpois(ncell(template1), lambda=10)
+template2 = resample(template1, rast_7)
+plot(template2)
+
+dat_dir = here("data", "Fletcher_Fortin-2018-Supporting_Files", "data")
+nlcd = raster(file.path(dat_dir, "nlcd2011SE.nc"))
+
+require(rgdal)
+# site and reptile data
+sites = readOGR(file.path(dat_dir, "reptiledata"))
+#inspect
+class(sites)
+proj4string(sites)
+proj4string(sites) <- nlcd_proj #set projection
+summary(sites)
+head(sites, 2)
+
+#plot with custom color scheme
+my_col <- c("black","blue","darkorange","red","darkred","grey30","grey50", "lightgreen",
+            "green", "darkgreen", "yellow", "goldenrod", "purple", "orchid","lightblue", "lightcyan")
+
+#plot
+plot(nlcd, col=my_col, axes=F, box=F)
+plot(sites, add=T)
+dev.copy2pdf(file="nlcd_reptiles.pdf", width = 7, height = 5)
+
+sites = rast_templ(8,8)
+sites[] <- rpois(ncell(sites), lambda=10)
+              
+empty_vec = rep(NA, length = nrow(sites))
+
+
+cover_data = data.frame(
+  f100m = empty_vec,
+  f500m = empty_vec,
+  f1000m = empty_vec,
+  f1500m = empty_vec,
+  f2000m = empty_vec,
+  f2500m = empty_vec,
+  f3000m = empty_vec,
+  f3500m = empty_vec
+)
+
+BufferCover <- function(coords, size, landcover, grain){
+  
+  bufferarea.i <- pi*size^2/10000                             #ha; size must be in m
+  coords.i <- SpatialPoints(cbind(coords[i, 1],coords[i, 2])) #create spatial points from coordinates
+  buffer.i <- gBuffer(coords.i, width=size)                   #buffer from rgeos
+  crop.i <- crop(landcover, buffer.i)                         #crop with raster function
+  crop.NA <- setValues(crop.i, NA)                            #empty raster for the rasterization
+  buffer.r <- rasterize(buffer.i, crop.NA)                    #rasterize buffer
+  land.buffer <- mask(x=crop.i, mask=buffer.r)                #mask by putting NA outside the boundary
+  coveramount<-cellStats(land.buffer, 'sum')*grain            #calculate area
+  percentcover<-100*(coveramount/bufferarea.i)                #convert to %
+  
+  return(percentcover)
+}
+
+for(i in 1:nrow(sites)) {
+  cover_data$f100m[i]  = BufferCover(sites, 100, forest, grainarea)
+  cover_data$f500m[i]  = BufferCover(sites, 500, forest, grainarea)
+  cover_data$f1000m[i] = BufferCover(sites, 1000, forest, grainarea)
+  cover_data$f1500m[i] = BufferCover(sites, 1500, forest, grainarea)
+  cover_data$f2000m[i] = BufferCover(sites, 2000, forest, grainarea)
+  cover_data$f2500m[i] = BufferCover(sites, 2500, forest, grainarea)
+  cover_data$f3000m[i] = BufferCover(sites, 3000, forest, grainarea)
+  cover_data$f3500m[i] = BufferCover(sites, 3500, forest, grainarea)
+  print(i)
+}
