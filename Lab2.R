@@ -80,7 +80,7 @@ template2 = resample(template1, rast_7)
 plot(template2)
 
 dat_dir = here("data", "Fletcher_Fortin-2018-Supporting_Files", "data")
-nlcd = raster(file.path(dat_dir, "nlcd2011SE.nc"))
+nlcd = raster(file.path("data", "nlcd2011SE.nc"))
 
 require(rgdal)
 # site and reptile data
@@ -95,11 +95,71 @@ head(sites, 2)
 #plot with custom color scheme
 my_col <- c("black","blue","darkorange","red","darkred","grey30","grey50", "lightgreen",
             "green", "darkgreen", "yellow", "goldenrod", "purple", "orchid","lightblue", "lightcyan")
-
+states = rgdal::readOGR(dsn = here("data", "tl_2018_us_state"))
+southernStates = subset(states, STUSPS %in% c("AL", "FL", "GA", "AR", "KN", "SC", "LA", "TN", "MS", "NC", "VA", "WV"))
+plot(southernStates, add = TRUE)
 #plot
 plot(nlcd, col=my_col, axes=F, box=F)
 plot(sites, add=T)
-dev.copy2pdf(file="nlcd_reptiles.pdf", width = 7, height = 5)
+
+states2 = raster(states)
+plot(states)
+
+states = spTransform(readOGR(here("data", "tl_2018_us_state")), proj4string(nlcd))
+southernStates = subset(states, STUSPS %in% c("AL", "FL", "GA", "AR", "KN", "SC", "LA", "TN", "MS", "NC", "VA", "WV"))
+
+plot(southernStates)
+plot(nlcd, add = TRUE)
+nlcd_states = spTransform(
+  raster(file.path(dat_dir, "nlcd2011SE.nc")),
+  proj4string(states2))
+
+Object2reprojected <- spTransform(states,crs(nlcd))
+dev.copy2pdf(file="graph_forest_density.pdf", width = 7, height = 5)
+new_nlcd = extent(nlcd)
+extent(c(0, 7, 0, 7))
+my_col = adjustcolor(c("red", "orange", "#004040a0"), alpha.f = 0.25)
+par(bg=my_col)
+plot(new_nlcd, add = TRUE,  col="black")
+
+dev.copy2pdf(file="forestMap.pdf", width = 7, height = 5)
+
+##  alpha = 1/2 * previous alpha --> opaque colors
+x <- palette(adjustcolor(palette(), 0.5))
+
+matplot(new_nlcd, type = "b", pch = 21:23, col = 2:5, bg = 2:5,
+        main = "Using an 'opaque ('translucent') color palette")
+
+#create a binary forest layer using nlcd as template
+forest <- nlcd
+values(forest) <- 0 #set to zero
+
+#reclassify:
+#with raster algebra; this is slow
+
+forest[nlcd==41 | nlcd==42 | nlcd==43] <- 1  #locations with evergreen + mixed forest + deciduous forest
+
+#reclassify with reclassify function is faster
+reclass <- c(rep(0,7), rep(1,3), rep(0,6))
+nlcd.levels <- levels(nlcd)[[1]]
+
+#create reclassify matrix: first col: orginal; second: change to
+reclass.mat <- cbind(levels(nlcd)[[1]], reclass)
+reclass.mat
+
+#reclassify
+forest <- reclassify(nlcd, reclass.mat)
+
+#plot
+plot(forest)
+plot(sites, pch=21, col="white", add=T)
+
+grainarea <- res(forest)[[1]]^2/10000#in ha
+bufferarea <- (3.14159*buf1km^2)/10000#pi*r^2
+forestcover1km <- cellStats(buffer.forest1.1km, 'sum')*grainarea
+percentforest1km <- forestcover1km/bufferarea*100
+
+plot(new_nlcd, add = TRUE, col="")
 
 sites = rast_templ(8,8)
 sites[] <- rpois(ncell(sites), lambda=10)
@@ -118,6 +178,8 @@ cover_data = data.frame(
   f3500m = empty_vec
 )
 
+
+
 BufferCover <- function(coords, size, landcover, grain){
   
   bufferarea.i <- pi*size^2/10000                             #ha; size must be in m
@@ -133,14 +195,20 @@ BufferCover <- function(coords, size, landcover, grain){
   return(percentcover)
 }
 
+f1km <- rep(NA, length = nrow(sites))
+f2km <- rep(NA, length = nrow(sites))
+
+#with for loop (all five buffers: 910s; <=3km: 228s)
 for(i in 1:nrow(sites)) {
-  cover_data$f100m[i]  = BufferCover(sites, 100, forest, grainarea)
-  cover_data$f500m[i]  = BufferCover(sites, 500, forest, grainarea)
-  cover_data$f1000m[i] = BufferCover(sites, 1000, forest, grainarea)
-  cover_data$f1500m[i] = BufferCover(sites, 1500, forest, grainarea)
-  cover_data$f2000m[i] = BufferCover(sites, 2000, forest, grainarea)
-  cover_data$f2500m[i] = BufferCover(sites, 2500, forest, grainarea)
-  cover_data$f3000m[i] = BufferCover(sites, 3000, forest, grainarea)
-  cover_data$f3500m[i] = BufferCover(sites, 3500, forest, grainarea)
+  f1km[i] <- BufferCover(coords=sites,size=1000,landcover=forest,grain=grainarea)
+  f2km[i] <- BufferCover(coords=sites,size=2000,landcover=forest,grain=grainarea)
   print(i)
 }
+
+#make a data frame
+forest.scale <- data.frame(site=sites$site,
+                           x=sites$coords_x1, y=sites$coords_x2,
+                           f1km=f1km, f2km=f2km)
+
+#plot
+plot(f1km, f2km)
