@@ -21,7 +21,7 @@ require(here)
 
 #Q5: Identify at least one good reason for using simulated data when you’re 
 #learning new concepts or techniques.
-
+require(here)
 dat_dir = here("data", "Fletcher_Fortin-2018-Supporting_Files", "data")
 nlcd = raster(file.path(dat_dir, "nlcd2011SE.nc"))
 
@@ -137,7 +137,7 @@ values(forest) <- 0 #set to zero
 #reclassify:
 #with raster algebra; this is slow
 
-forest[nlcd==41 | nlcd==42 | nlcd==43] <- 1  #locations with evergreen + mixed forest + deciduous forest
+shrubs = forest[nlcd==51 | nlcd==52] <- 1  #locations with evergreen + mixed forest + deciduous forest
 
 #reclassify with reclassify function is faster
 reclass <- c(rep(0,7), rep(1,3), rep(0,6))
@@ -154,7 +154,7 @@ forest <- reclassify(nlcd, reclass.mat)
 plot(forest)
 plot(sites, pch=21, col="white", add=T)
 
-grainarea <- res(forest)[[1]]^2/10000#in ha
+grainarea <- res(shrubs)[[1]]^2/10000#in ha
 bufferarea <- (3.14159*buf1km^2)/10000#pi*r^2
 forestcover1km <- cellStats(buffer.forest1.1km, 'sum')*grainarea
 percentforest1km <- forestcover1km/bufferarea*100
@@ -209,6 +209,19 @@ for(i in 1:nrow(sites)) {
 forest.scale <- data.frame(site=sites$site,
                            x=sites$coords_x1, y=sites$coords_x2,
                            f1km=f1km, f2km=f2km)
-
+require(raster)
+require(rgeos)
 #plot
 plot(f1km, f2km)
+
+for(i in 1:nrow(sites)) {
+  cover_data$f100m[i]  = BufferCover(sites, 100, shrubs, grainarea)
+  cover_data$f500m[i]  = BufferCover(sites, 500, shrubs, grainarea)
+  cover_data$f1000m[i] = BufferCover(sites, 1000, shrubs, grainarea)
+  cover_data$f1500m[i] = BufferCover(sites, 1500, shrubs, grainarea)
+  cover_data$f2000m[i] = BufferCover(sites, 2000, shrubs, grainarea)
+  cover_data$f2500m[i] = BufferCover(sites, 2500, shrubs, grainarea)
+  cover_data$f3000m[i] = BufferCover(sites, 3000, shrubs, grainarea)
+  cover_data$f3500m[i] = BufferCover(sites, 3500, shrubs, grainarea)
+  print(i)
+}
