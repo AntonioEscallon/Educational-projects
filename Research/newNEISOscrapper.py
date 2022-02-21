@@ -6,6 +6,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 import datetime
 import pandas as pd
 import requests
+import glob 
 
 # This file allows for the scrapping LMP data
 
@@ -89,8 +90,8 @@ def lmp_to_csv_ne(date):
 #         update_dalmp_ne(day)
 #         day += datetime.timedelta(days=1)
 
-start = datetime.datetime.strptime('2019-02-01', '%Y-%m-%d')
-end = datetime.datetime.strptime('2019-10-31', '%Y-%m-%d')
+start = datetime.datetime.strptime('2021-02-01', '%Y-%m-%d')
+end = datetime.datetime.strptime('2021-02-28', '%Y-%m-%d')
 
 #back_fill_lmp(start, end)
 
@@ -105,6 +106,49 @@ def back_fill_lmp(start, end):
         day += datetime.timedelta(days=1)
     return merged_data
 
-data = back_fill_lmp(start, end)
-data.to_csv('researchData_0305.csv', sep='\t', encoding='utf-8')
-print(data)
+# data = back_fill_lmp(start, end)
+# print(data)
+# data.to_csv('febData20.csv', sep='\t', encoding='utf-8')
+path = "/Users/antonioescallon23/Documents/GitHub/Educational-projects/data/LMP_data"
+  
+# csv files in the path
+# files = glob.glob(path + "/*.csv")
+# print(files)
+# old_df = pd.DataFrame()
+# for csv in files:
+#     df_new = pd.read_csv(csv, sep='\t', encoding='utf-8')
+#     old_df = pd.concat([old_df, df_new], ignore_index=True, sort=False)
+
+def train_data(data_frame, targetID):
+    new_df = data_frame[data_frame['Location ID'] == targetID]
+    return new_df
+
+targetID= 4000
+data = pd.read_csv(path + '/joinedLMPData.csv', sep='\t')
+new_df = train_data(data, targetID)
+
+new_df = new_df.sort_values(by='Date')
+print(range(len(new_df)))
+
+prev_hour = [0]
+#print(new_df['Locational Marginal Price'][128694])
+new_df = new_df.reset_index()
+
+for i in range(len(new_df)):
+        if(i != 0):
+            prev_hour.append(new_df['Locational Marginal Price'][i - 1])
+        else:
+            continue
+
+print(prev_hour)
+
+new_df['prev_hour'] = prev_hour
+
+
+new_df.to_csv('station4000.csv', sep='\t', encoding='utf-8')
+        
+
+# print(old_df)
+
+# old_df.to_csv('joinedLMPDATA.csv', sep='\t', encoding='utf-8')
+#print(data)
