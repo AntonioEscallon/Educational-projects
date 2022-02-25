@@ -1,0 +1,155 @@
+
+.content-Logo {
+    width: 252px;
+    height: 87px;
+}
+
+.content-Button {
+    margin-left: 15px;
+}
+
+.content-signOut {
+    margin-left: 50%;
+}
+
+.content-Line {
+    height: 2px;
+    width: 100%;
+    background-color: #e5e5e5;
+}
+
+.content-Img {
+    width: 60%;
+    height: auto;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.content-Text {
+    margin-right: 20%;
+    margin-left: 20%;
+}
+
+.content-Head {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.content-smallHead {
+    width: 30px;
+    height: 30px;
+    margin-right: 6px;
+}
+
+.content-margeTop {
+    margin-top: 10px;
+}
+
+.content-margeBottom {
+    margin-bottom: 20px;
+}
+
+.submitButton {
+    width: 100px;
+    height: 40px;
+    background-color: #DE3030F0;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 20;
+    border-radius: 20px;
+    margin-top: 20px;
+}
+
+.mainPageAll {
+    background-color: #d0d0d041;
+}
+
+.mainPageContent {
+    margin: auto;
+    width: 800px;
+    height: 1000px;
+}
+
+.mainPageHeader {
+    font-weight: 600;
+    font-size: 40px;
+    text-align: center;
+}
+
+.mainPageUserIcon {
+    width: 43px;
+    height: 43ox;
+    border-radius: 50%;
+}
+
+.mainPageCard {
+    margin-top: 20px;
+    border-radius: 20px;
+}
+
+.mainPageUser {
+    font-weight: 700;
+    font-size: 18;
+}
+
+.mainPagePost {
+    width: 600px;
+    height: 130px;
+    margin: auto;
+    border-radius: 20px;
+    background-color: #EBEBEB;
+}
+
+.mainPagePostText {
+    margin-left: 20px;
+}
+
+.mainPagePostButton {
+    margin-top: 10px;
+    margin-right: 100px;
+    float: right;
+}
+
+.mainPageButton {
+    border-radius: 10px;
+}
+
+.mainPageButtonIcon {
+    width: 25px;
+    height: 25px;
+}
+
+.mainPageActualPostTitle {
+    font-weight: 700;
+    font-size: 18px;
+    text-align: center;
+    color: black;
+
+    margin: auto;
+}
+
+.mainPageActualPostImage {
+    margin-bottom: 20px;
+}
+
+.mainPageActualPostContents {
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.colorGrey {
+    padding-left: 10px;
+    color: grey;
+    font-size: 15px;
+}
+
+.usernameSize {
+    font-size: 20px;
+}
