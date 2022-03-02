@@ -6,4 +6,15 @@
 *.ipynb_checkpoints
 __pycache__/
 .ipynb_checkpoints
-*.data
+.data
+*.tiff
+*.hdr
+*.prj
+*.stx
+*.bil
+*.stx
+*.sd
+*.gif
+*.lyr
+*.cpg
+*.pdf
