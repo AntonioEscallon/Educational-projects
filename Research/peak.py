@@ -42,6 +42,9 @@ OctSigma = 5
 NovSigma = 5
 DecSigma = 5
 
+high_hours = [6, 7, 8 , 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+low_hours = [1, 2, 3, 4, 5, 21, 22, 23, 24]
+
 month_predicted_peak = [JanDemand,FebDemand, MarDemand, AprDemand, MayDemand, JunDemand, JulDemand, AugDemand, SepDemand, OctDemand]
 month_sigma = [JanSigma,FebSigma, MarSigma, AprSigma, MaySigma, JunSigma, JulSigma, AugSigma, SepSigma, OctSigma, NovSigma, DecSigma]
 month_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -131,7 +134,8 @@ def findTotalHours(allData_df, prediction_accuracy, month_Calc):
         heuristic = heuristicHour and heuristicDemand
         #if the heuristic is true for this row, then this row is a potential peak hour and will be added to hypothesis df.
         if heuristic:
-            hypothesisHours_df = hypothesisHours_df.append({timeStampColumnName :curDate, monthColumnName: curMonth, hourColumnName :curHour, dayColumnName: curDayOfWeek, loadColumnName: curGridLoad}, ignore_index=True)
+            hypothesisHours_df = hypothesisHours_df.append({timeStampColumnName :curDate, monthColumnName: curMonth, hourColumnName :curHour, 
+            dayColumnName: curDayOfWeek, loadColumnName: curGridLoad}, ignore_index=True)
     return hypothesisHours_df
 
 #Convertint to the same format. Hopefully it will be fitting into SQL
@@ -145,6 +149,7 @@ def convertSQLFormat(sql_df):
     formatted_df[hourColumnName] =  formatted_df[hourColumnName]
 
     return formatted_df
+
 
 #Basic training of data rleying on historic average and stdev
 def train_to_find_data(data, month_list, month_column_name):
@@ -163,6 +168,24 @@ def train_to_find_data(data, month_list, month_column_name):
 
     return math_df
 
+#Creating a really bad forecast
+def how_high(df, date_column, high_hours, month_Calc, lmp_column, hour_column, repetitions):
+
+    new_lmp = [0]
+    count = 1
+    for i in range(1, len(df[date_column])):
+        curMonth = int(df[monthColumnName][i])
+        if df[date_column][i] == df[date_column][i -1] or count != repetitions:
+            if np.isin(df[hour_column][i], high_hours):
+                new_lmp.append(df[lmp_column][2] + 0.05*month_Calc[sigmaColumnName][curMonth - 1]*prediction_accuracy*df[hour_column][i])
+            else:
+                new_lmp.append(df[lmp_column][0] - 0.05*month_Calc[sigmaColumnName][curMonth - 1]*prediction_accuracy*df[hour_column][i])
+        else:
+            break
+        count = count+1
+    print(count)
+    return new_lmp
+
     # for row in data.iterrows():
     #     row = row[0]
     #     #set variables for this specific row in dataframe
@@ -177,16 +200,24 @@ def train_to_find_data(data, month_list, month_column_name):
     #     curGridLoad = float(curGridLoad)
     #     curMonth = int(curMonth)
 
-
-
+lmp_column = 'Locational Marginal Price'
+hour_column = 'Hour Ending'
+date_column = 'Date'
 
 
 
 
     
 prediction_accuracy = 0.95
-df = pd.read_csv('/Users/antonioescallon23/Documents/GitHub/Educational-projects/Research/researchData_00.csv', sep='\t')
+df = pd.read_csv('/Users/antonioescallon23/Documents/GitHub/Educational-projects/data/LMP_data/station4000.csv', sep='\t')
 old_df = convertSQLFormat(df)
-new_data_df = train_to_find_data(old_df, month_list, monthColumnName)
-new_df = findTotalHours(old_df, prediction_accuracy, new_data_df)
-print(new_df)
+month_Calc = train_to_find_data(old_df, month_list, monthColumnName)
+repetitions = len(old_df) + 2
+print(repetitions)
+new_list = how_high(old_df, date_column, high_hours, month_Calc, lmp_column, hour_column, repetitions)
+print(len(new_list))
+print(len(old_df))
+old_df["new_calc"] = new_list
+old_df.to_csv("new_calc.csv")
+# new_df = findTotalHours(old_df, prediction_accuracy, new_data_df)
+# print(new_df)

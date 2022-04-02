@@ -123,26 +123,32 @@ def train_data(data_frame, targetID):
     new_df = data_frame[data_frame['Location ID'] == targetID]
     return new_df
 
+
+start = datetime.datetime.strptime('2021-02-01', '%Y-%m-%d')
+end = datetime.datetime.strptime('2021-02-28', '%Y-%m-%d')
+
 targetID= 4000
 data = pd.read_csv(path + '/joinedLMPData.csv', sep='\t')
 new_df = train_data(data, targetID)
 
-new_df = new_df.sort_values(by='Date')
+sorted_df = new_df.sort_values(by='Date')
+sorted_df.to_csv('station4000.csv', sep='\t', encoding='utf-8')
+
 print(range(len(new_df)))
 
-prev_hour = [0]
-#print(new_df['Locational Marginal Price'][128694])
-new_df = new_df.reset_index()
+def last_hour(new_df):
+    prev_hour = [0]
+    #print(new_df['Locational Marginal Price'][128694])
+    new_df = new_df.reset_index()
+    for i in range(len(new_df)):
+            if(i != 0):
+                prev_hour.append(new_df['Locational Marginal Price'][i - 1])
+            else:
+                continue
 
-for i in range(len(new_df)):
-        if(i != 0):
-            prev_hour.append(new_df['Locational Marginal Price'][i - 1])
-        else:
-            continue
+    print(prev_hour)
 
-print(prev_hour)
-
-new_df['prev_hour'] = prev_hour
+    new_df['prev_hour'] = prev_hour
 
 
 new_df.to_csv('station4000.csv', sep='\t', encoding='utf-8')

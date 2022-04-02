@@ -1,6 +1,6 @@
 require(here)
 require(raster)
-install.packages("landscapemetrics")
+#install.packages("landscapemetrics")
 require(rasterVis)
 require(igraph)
 require(landscapemetrics)
@@ -62,16 +62,35 @@ hist(
 
 #Placing our new data into a raster
 carver = raster(here(
-  "data", "carver_bogs",
-  "NLCD_2001_Land_Cover_L48_20210604_twhHnv7eGwpL3DLaGf2I.tiff"))
-
+  "data", "Carver",
+  "NLCD_2001_Land_Cover_L48_20210604_WXCWQk6ah81Ij1rhoMdp.tiff"))
 tomah = raster(here(
-  "data", "tomah_bogs",
-  "NLCD_2001_Land_Cover_L48_20210604_X6xxWhgNuPvZI4ZjRai9.tiff"))
+  "data", "Tomah",
+  "NLCD_2001_Land_Cover_L48_20210604_D36ktz6xTBbLaWsN2qO4.tiff"))
 
 carver_f = as.factor(carver)
 tomah_f = as.factor(tomah)
 
+land_cover <- levels(carver_f)[[1]]
+land_cover[,"landcover"] <- c("forest","developed", "ag","grass","open","wetland")
+levels(carver_f) <- land_cover
+
+land_col <- c("darkolivegreen","red","darkolivegreen3","orange","beige","blue")
+plot(carver_f, legend = T, col = land_col)
+
+levelplot(carver_f, col.regions=land_col, xlab="", ylab="")
+
+land_cover <- levels(tomah_f)[[1]]
+land_cover[,"landcover"] <- c("forest","developed", "ag","grass","open","wetland")
+levels(tomah_f) <- land_cover
+
+land_col <- c("green","orange","yellow","brown","white","blue")
+plot(tomah_f, legend = T, col = land_col)
+
+levelplot(tomah_f, col.regions=land_col, xlab="", ylab="")
+
+plot(tomah_f, legend = T, col = land_col)
+plot(carver_f, legend = T, col = land_col)
 plot(tomah)
 
 carver_levels = read.csv(
@@ -118,6 +137,8 @@ levelplot(
   col.regions = col_tomah,
   main = "Landcover Classes in Tomah, WI",
   scales = list(draw = F))
+
+dev.copy2pdf(file="TomahRasterFinal2.pdf", width = 7, height = 5)
 
 levelplot(
   carver_f,
