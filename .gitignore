@@ -17,4 +17,10 @@
 *.sbn
 *.tfw
 *.txt
-
+*.tiff
+*.gif
+*.pdf
+*.GPKG
+*.lyr
+*.tif
+*.prj

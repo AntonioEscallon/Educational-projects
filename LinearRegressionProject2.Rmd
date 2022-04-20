@@ -1,0 +1,115 @@
+---
+title: "Linear regression model analysis"
+author: "Antonio Escallón"
+date: "2/24/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(caTools)
+library(corrgram)
+```
+
+## Introduction: 
+This report will break down how reliable a linear regression model is at predicting locational marginal price when using the previous hours value. For the sake of clarity in the process used throughout this short experiment, all of the code used--with the exception of package installation and the data scrapper code, which was written in python--will be included below. 
+
+## Phase 1:
+As mentioned before, the code for the data scrapper has not been included in this document, but the output of it, which is the csv document named "station4000", will be what our analysis is based off of.
+
+```{r cars}
+#Creating a data frame from the stations csv
+df <- read.csv('data/LMP_data/station4000.csv', sep='\t')
+#Making sure no null values are in this document
+any(is.na(df))
+#Printing the head of the data frame
+head(df)
+```
+## Phase 2:
+Setting a seed for the linear model. The seed should be kept at the same number if we seek reproduction of this project. As mentioned below, the data is split 70-30. The initial split will be used to train the linear model, while the later will be used to test the reliability of the model. 
+
+```{r pressure}
+#Seed should always be set to the same number to assure that the model is always consistent
+set.seed(42)
+
+#Splitting the data 70-30; 70% of it will be used for training the model, 30% fro testing
+sampleSplit <- sample.split(Y=df$Locational.Marginal.Price, SplitRatio=0.7)
+
+#Creating the train and test data frames
+trainSet <- subset(x=df, sampleSplit==TRUE)
+testSet <- subset(x=df, sampleSplit==FALSE)
+```
+
+## Phase 3:
+Below is the core part of this project: The building of a linear model and a set of predictions. R facilitates the process of this by having functions for both. All we had to do was clean the data and choose two variables that were correlated in a significant way. Arduous research proved that the best variable that we could have access to with the data we scrapped was the price of the previous hour. 
+
+```{r}
+#Training linear model using the current price and the previous hour price
+model <- lm(formula=Locational.Marginal.Price ~prev_hour, data=trainSet)
+
+#Testing the model by building a set of predictions
+preds = predict(model, testSet)
+```
+
+## Phase 4: 
+Creating a data frame to evaluate our predictions against the actual prices. As we can see from the results below, our model does alright. 
+
+```{r}
+#Building a data frame with the set of predictions and the actual prices
+modelEval <- cbind(testSet$Locational.Marginal.Price, preds)
+colnames(modelEval) <- c('Actual', 'Predicted')
+modelEval <- as.data.frame(modelEval)
+#Resetting the index
+modelEval <- modelEval                           
+rownames(modelEval) <- NULL 
+
+#Printing the model evaluation
+head(modelEval)
+```
+## Phase 5:
+Of course, looking just at the first 6 rows does not tell us how good the rest of the data actually is. In order to further analyze this, we first build a Histogram of the Residual, which can be used to check whether the variance is normally distributed or not. 
+
+```{r}
+modelResiduals <- as.data.frame(residuals(model)) 
+ggplot(modelResiduals, aes(residuals(model))) +
+  geom_histogram(fill='darkolivegreen', color='black')
+```
+
+
+We also check the MSE and the RMSE: 
+```{r}
+#Mean squared error
+mse <- mean((modelEval$Actual - modelEval$Predicted)^2)
+print("Mean square error:")
+print(mse)
+#Root of the mean square value
+rmse <- sqrt(mse)
+print("Root mean square error:")
+print(rmse)
+#On average we are wrong by 7.951 LMP units
+```
+
+We check the model summary, where we can see that we have a p-value well below 0.05 and an R-squared of 0.8175, which is good, but not great. On average, we miss the estimation of price by 7.951851 LMP units. 
+
+```{r}
+summary(model)
+```
+
+Finally, we produce a scatter plot of the predicted vs the actual values, which show us once again that our model is good, but not great, at predicting LMP values. Since our r-squared value is well below 0.9, this model should not be used for the prediction of LMP values. If a decision were to be made using the data given by this model, it would be best advised to be more conservative than not. 
+
+```{r}
+#Plotting predicted vs actual 
+ggplot(modelEval,                                    
+       aes(x = Predicted,
+           y = Actual)) +
+  geom_point(color = "darkolivegreen") +
+  geom_abline(intercept = 0,
+              slope = 1,
+              color = "lightgreen",
+              size = 2)
+```
+
+
+

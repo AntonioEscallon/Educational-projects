@@ -1,0 +1,38 @@
+---
+title: "linearRegression"
+author: "Antonio Escallón"
+date: "2/24/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##INtroduction: Linear regression model analysis 
+
+This report will break down how reliable a linear regression model is at predicitng locational marginal price when using the previous hours value. For the sake of clarity in the process used throughout this short experiment, all of the code used--with the exception of package installation and the data scrapper code, which was written in python--will be included below. 
+
+##Step 1:
+As mentioned before, the code for the data scrapper has not been included in this document, but the output of it, which is the csv document named "station4000", will be what our analysis is based off of. 
+
+```{r cars}
+#Creating a data frame from the stations csv
+df <- read.csv('data/LMP_data/station4000.csv', sep='\t')
+#Making sure no null values are in this document
+any(is.na(df))
+#Printing the head of the data frame
+head(df)
+#Printing a correlation table 
+corrgram(df, lower.panel=panel.shade, upper.panel=panel.cor)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

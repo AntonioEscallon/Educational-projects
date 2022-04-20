@@ -1,0 +1,21 @@
+require(sf)
+require(here)
+rm(list = ls())
+
+ca_border = read_sf(here("data", "ca_border.GPKG"))
+nv_border = read_sf(here("data", "nv_border.GPKG"))
+nv_cnty = read_sf(here("data", "nv_counties.GPKG"))
+dvnp = read_sf(here("data", "dvnp.GPKG"))
+ca_counties = read_sf(here("data", "ca_counties.GPKG"))
+
+st_crs(ca_counties)
+st_crs(nv_counties)
+
+ca_counties = st_transform(ca_counties, st_crs(nv_counties))
+ca_cnty = st_transform(ca_cnty, st_crs(nv_cnty))
+ca_border = st_transform(ca_border, st_crs(nv_cnty))
+nv_border = st_transform(nv_border, st_crs(nv_cnty))
+dvnp = st_transform(dvnp, st_crs(nv_cnty))
+par(mar = c(0, 0, 0, 0))
+plot(st_geometry(nv_cnty))
+plot(st_geometry(dvnp), add = T, col = adjustcolor("steelblue", 0.3))
