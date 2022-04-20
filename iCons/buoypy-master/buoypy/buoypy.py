@@ -64,6 +64,7 @@ class realtime:
     def __init__(self, buoy):
 
         self.link = 'http://www.ndbc.noaa.gov/data/realtime2/{}'.format(buoy)
+        print('http://www.ndbc.noaa.gov/data/realtime2/{}'.format(buoy))
 
     def data_spec(self):
         """
@@ -428,11 +429,14 @@ class realtime:
 
 class historic_data:
 
-    def __init__(self, buoy, year, year_range=None):
+    def __init__(self, buoy, year, year_range= None):
 
         link = 'http://www.ndbc.noaa.gov/view_text_file.php?filename='
         link += '{}h{}.txt.gz&dir=data/historical/'.format(buoy, year)
         self.link = link
+        self.year_range = year_range
+        self.buoy = buoy
+
 
     def get_stand_meteo(self,link = None):
         '''

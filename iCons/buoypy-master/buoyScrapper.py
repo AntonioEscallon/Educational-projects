@@ -23,10 +23,25 @@ def create_df(buoy_list, date_column, function_1, function_2, **kwargs):
         print(station)
         temp_file = bp.realtime(station)
         print(temp_file)
+        print('hmmmm')
         temp_df = temp_file.txt()
-        print(temp_df.index)
+        print(temp_df)
         temp_df = temp_df[[function_1, function_2]]
-        temp_df.to_csv('station' + station + '.csv', sep='\t', encoding='utf-8')
+        break
+        #temp_df.to_csv('station' + str(station) + 'ph2Hist.csv', sep='\t', encoding='utf-8')
+
+def create_df2(buoy_list, date_column, function_1, function_2, **kwargs):
+
+    for station in buoy_list:
+        print(station)
+        temp_file = bp.historic_data(station, 2000, (2000, 2017))
+        print(temp_file)
+        print('hmmmm')
+        temp_df = temp_file.get_all_stand_meteo()
+        print(temp_df)
+        temp_df = temp_df[[function_1, function_2]]
+        break
+        #temp_df.to_csv('station' + str(station) + 'ph2Hist.csv', sep='\t', encoding='utf-8')
 
 
 id = 'ID'
@@ -34,10 +49,12 @@ date_column = 'index'
 function_1 = 'WSPD'
 function_2 = 'WDIR'
 
-station_file = pd.read_csv('/Users/antonioescallon23/Documents/GitHub/Educational-projects/iCons/buoypy-master/Buoy Locations - Sheet1.csv')
+station_file = pd.read_csv('/Users/antonioescallon23/Documents/GitHub/Educational-projects/iCons/data/Buoy - Sheet1.csv')
 
 station_list = create_list(station_file, id)
+station_list = ['BRHC3', 'NWHC3']
 create_df(station_list, date_column, function_1, function_2)
+create_df2(station_list, date_column, function_1, function_2)
 
 # plotting
 # fig,ax = plt.subplots(2,sharex=True)
