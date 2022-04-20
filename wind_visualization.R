@@ -45,7 +45,7 @@ head(wind_data)
 getwd()  
 wind.dl(2015,2,12,0,-75,-66,35,45, type="csv")  
 
-
+write.csv(wind_data)
 # If you inspect inside wind_data object, you can see that data are organized in a weird way, with  
 # to rows as headers, a column with date and time, longitude data expressed in 0/360 notation and wind  
 # data defined by the two vector components U and V. You can transform these data in a much more nice format
