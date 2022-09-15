@@ -1,0 +1,58 @@
+from datetime import datetime, timedelta
+from itertools import count
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+import pandas as pd
+
+df_hss = pd.read_csv('/Users/antonioescallon23/Documents/GitHub/Educational-projects/df_hss.csv')
+event = "event"
+value ="value"
+condition = "condition"
+variable = "variable"
+image = 'image'
+TF = 'TF'
+Name = 'Name'
+
+
+def truF_colum(row):
+    if (row[event] == "event" and row[value] == 50) or (row[event]== "noEvent"  and row[value] == 100):
+        return "1"
+    else:
+        return "0"
+
+# df_trade = df_hss
+# df_trade = df_hss[df_hss.condition.notnull()]
+# df_trade = df_trade[df_trade[variable] == "traded"]
+#df_trade['TF'] = df_trade.apply(truF_colum, axis = 1)
+#df_trade['TF'] = df_trade.apply(lambda x: 1 if (x[event] == "event" and x[value] == 50) or (x[event]== "noEvent"  and x[value] == 100)
+#               else  0, axis=1)
+# print(df_trade['TF'])
+# print(df_hss.groupby(event)[event].count())
+# print(df_trade.groupby(value)[value].count())
+# print((sum(df_trade[event] == "event")))
+#df_new = df_trade[[event, value, 'TF', variable]]
+#print(df_new)
+
+
+
+df_hss['Name'] = df_hss[image].str.slice(7,30)
+
+print(df_hss)
+
+new_df = df_hss.groupby([Name]).sum()
+
+
+sum_df = df_hss[(df_hss.TF == 0) & (df_hss.image == 'images/2019011300_detm_all_NOHSSD.png')].count()
+
+#print(sum_df)
+
+value_image = df_hss[image].value_counts()
+
+new_df['total_value'] = value_image
+
+new_df['Percent Correct'] = new_df['TF']/value_image[0]
+
+
+print(new_df)
+
+new_df.to_csv('percentCorrect.csv')

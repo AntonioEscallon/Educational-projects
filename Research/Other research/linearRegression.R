@@ -2,7 +2,7 @@ library(dplyr)
 library(ggplot2)
 library(caTools)
 library(corrgram)
-install.packages("reshape")
+#install.packages("reshape")
 require(reshape)
 
 rm(list = ls())
@@ -65,7 +65,8 @@ print(rmse)
 
 #Plotting predicted vs actual 
 dat.m <- melt(modelEval, id.vars = "Actual")
-ggplot(dat.m,                                     # Draw plot using ggplot2 package
+dat2.m <- melt(modelEval2, id.vars = "Actual")
+ggplot(dat2.m,                                     # Draw plot using ggplot2 package
        aes(Actual, value, colour = variable)) +
   geom_point()+
   scale_colour_manual(values = c("red", "darkred")) +
@@ -73,3 +74,4 @@ ggplot(dat.m,                                     # Draw plot using ggplot2 pack
               slope = 1,
               color = "orange",
               size = 2)
+points(dat2.m$Actual, dat2.m$value, col = "orange", pch = 19)
