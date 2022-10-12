@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../iCons"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Educational-projects"
+	}
+}
