@@ -114,11 +114,11 @@ class MinimaxLookaheadAgent(MinimaxAgent):
 
     def __init__(self, depth_limit):
         self.depth_limit = depth_limit
-        super().__init__()
+        #super().__init__()
     
     def maxHelper (self, state, depth):
         child_list =[]
-        max = -100000
+        maxTemp = -100000
 
         if state.is_full():
             return state.utility()
@@ -129,14 +129,14 @@ class MinimaxLookaheadAgent(MinimaxAgent):
 
             child_list.append(self.maxHelper(child, depth -1))
 
-            max = max(child_list)  
+            maxTemp = max(child_list)  
         
-        return max 
+        return maxTemp 
     
     def minHelper(self, state, depth):
 
         child_list =[]
-        min = 100000
+        minTemp = 100000
 
         if state.is_full():
             return state.utility()
@@ -147,9 +147,9 @@ class MinimaxLookaheadAgent(MinimaxAgent):
 
             child_list.append(self.minHelper(child, depth - 1))
 
-            min = min(child_list)  
+            minTemp = min(child_list)  
         
-        return min 
+        return minTemp
 
 
     def minimax(self, state):
@@ -245,7 +245,7 @@ class MinimaxPruneAgent(MinimaxAgent):
     def maxAlphabeta(self, state, depth, alpha, beta):
         """This is just a helper method for minimax(). Feel free to use it or not."""
         child_list =[]
-        max = -100000
+        maxTemp = -100000
 
         if state.is_full():
             return state.utility()
@@ -256,17 +256,17 @@ class MinimaxPruneAgent(MinimaxAgent):
 
             child_list.append(self.maxHelper(child, depth -1, alpha, beta))
 
-            max = max(child_list) 
-            if max >= beta:
-                return max
-            a = max(a, max) 
+            maxTemp  = max(child_list) 
+            if maxTemp  >= beta:
+                return maxTemp 
+            a = max(a, maxTemp ) 
         
-        return max 
+        return maxTemp 
     
     def minAlphabeta(self, state, depth, alpha, beta):
         """This is just a helper method for minimax(). Feel free to use it or not."""
         child_list =[]
-        min = 100000
+        minTemp = 100000
 
         if state.is_full():
             return state.utility()
@@ -277,12 +277,12 @@ class MinimaxPruneAgent(MinimaxAgent):
 
             child_list.append(self.minHelper(child, depth - 1, alpha, beta))
 
-            min = min(child_list)  
-            if min <= alpha:
-                return min
-            beta = min(beta, min)
+            minTemp = min(child_list)  
+            if minTemp <= alpha:
+                return minTemp
+            beta = min(beta, minTemp)
     
-        return min
+        return minTemp
     
     def alphabeta(self, state,alpha, beta):
         """This is just a helper method for minimax(). Feel free to use it or not."""
