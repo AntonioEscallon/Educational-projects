@@ -1,0 +1,96 @@
+---
+title: "DataExplorationAndDeterministic"
+author: "Antonio Escallón"
+date: "10/11/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r cars}
+require(here)
+data_dir = here(
+  "data")
+dat_habitat <- data.frame(read.csv(here("data","hab.sta.csv")))
+par(mfrow=c(2,3)) 
+hist(dat_habitat$elev, main= "Elevation Histogram", breaks = 8, xlab="Elevation")
+hist(dat_habitat$aspect, main= "Aspect Histogram", breaks = 8, xlab="Aspect")
+hist(dat_habitat$slope, main= "Slope Histogram", breaks=8, xlab="Slope")
+line_point_slope = function(x, x1, y1, slope)
+{
+  get_y_intercept = 
+    function(x1, y1, slope) 
+      return(-(x1 * slope) + y1)
+  
+  linear = 
+    function(x, yint, slope) 
+      return(yint + x * slope)
+  
+  return(linear(x, get_y_intercept(x1, y1, slope), slope))
+}
+MyGreen <- rgb(t(col2rgb("DarkGreen")), alpha=50, maxColorValue=255)
+plot(
+  x = dat_habitat$aspect, 
+  y = dat_habitat$ba.tot,
+  xlab = "Aspect",
+  ylab = "Total basal area",
+  main = "Basal Area vs Aspect Scatterplot",
+  col=MyGreen
+)
+curve(line_point_slope(x, x1 = 0.5, y1 = 0.25, slope = 0.06), add = TRUE)
+plot(
+  x = dat_habitat$elev, 
+  y = dat_habitat$ba.tot,
+  xlab = "Elevation",
+  ylab = "Total basal area",
+  main = "Basal Area vs Elevation Scatterplot",
+  col=MyGreen
+)
+curve(line_point_slope(x, x1 = 0.5, y1 = 0.25, slope = 0.06), add = TRUE)
+plot(
+  x = dat_habitat$slope, 
+  y = dat_habitat$ba.tot,
+  xlab = "Slope",
+  ylab = "Total basal area",
+  main = "Basal Area va Slope Scatterplot",
+  col=MyGreen
+)
+curve(line_point_slope(x, x1 = 0.5, y1 = 0.25, slope = 0.45), add = TRUE)
+
+```
+
+* Interpret the shape of the elevation histogram in non-technical language that a non-scientist audience would understand. Some points to consider:
+  + Are there more high- or low-elevation sampling sites?
+  + Is there an even distribution of sampling site elevation?
+  + We can see that for the distribution of the elevation histogram, it has the biggest bars around the center, and as we get father from the center that       bars get smaller. This means that most of our sampling sites occur at somewhat of medium-high elevation. 
+
+* What are the units of slope in this data set?
+  + Hint: Properly curated data often has associated ____data…
+  + The units of slope in this data set are that of percent. If we look further into the number, we realize it is (rise in meters/run in meters)*100.  
+
+* Consider the distribution of slopes at the bird census sample sites.
+  + Interpret the shape of the slope histogram in non-technical language that a non-scientist audience would understand. Some points to consider:
+  + Are most sample sites flat?
+  + Is there an even mixture of steep and shallow slopes?
+  + So if we compare the distribution between the elevation histogram and this histogram, we can see that for this one (pertaining the slope), our data is      much more evenly distributed. With most of the sampling sites having somewhat of a slope. That being said, it is clear that as we get into our high          values for slope, we see a steep decline in sites.
+
+
+* Briefly define aspect, describing the units used in this data set.
+  + Aspect is the orientation of the slope, and its units are in degrees from 0-360. 
+
+* Consider the distribution of aspect at the bird census sample sites.
+* Interpret the shape of the aspect histogram in non-technical language that a non-scientist audience would understand. Some points to consider:
+  + Do the sampling sites tend to be on north-facing slopes?
+  + South-facing?
+  + Evenly distributed?
+  + Now aspect is a fascinating histogram, because we don't see pretty much any of the trends that we saw before. Here, you can see that most of the bars are     similar in height and thus create an evenly distributed histogram. The only exception is for when you get to the highest value of ~360, which is where we     see a drop off. That is because our histogram boxes are broken by 50, but because all of them are pretty evenly distributed, when we get to 350, you can      only account for 10 more degrees (as opposed to 50 in the other bars). What we are seeing here is not a change in the trend of sites, but rather an error     when fitting the data to our histogram. 
+
+* For each terrain variable (elevation, slope, aspect), describe the relationship you observe and your model fit. You should consider:
+  + Is there a noticeable association?
+  + If so, is it linear?
+  + Based on a visual assessment, is your linear model a good fit for the data, why or why not?
+    - Elevation: There is very little correlation between the variables. It appears as though the elements are scattered evenly on the basal area as               elevation increases. Due to that, I believe my model is not a good fit for the data. I think my model shows a positive correlation, when in fact it          should just be a direct neutral correlation 
+    - Aspect: Here we see more of a direct positive correlation, at least of a little bit. One could say that this relationship is linear and that the model       I have created could fit it, at least until the ~600 mark. 
+    - Slope: Again, I don't think we see much of a correlation here, which is a little disappointing and maybe leads me to believe that I might have made a          mistake somewhere. The relationship is not linear and my model could not fit the data. 
+
