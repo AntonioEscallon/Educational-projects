@@ -1,0 +1,131 @@
+---
+title: "inClassCoding"
+author: "Antonio Escallón"
+date: "10/6/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r histogram_1, echo=FALSE}
+require(palmerpenguins)
+hist(penguins$body_mass_g)
+```
+
+```{r multi_panel_1, echo= FALSe}
+par(mfrow = c(2, 2))
+hist(
+penguins$body_mass_g,
+main = "Histogram of Body Mass",
+xlab = "Body Mass (g)")
+hist(
+penguins$flipper_length_mm,
+main = "Histogram of Flipper Length",
+xlab = "Flipper Length (mm)")
+boxplot(
+body_mass_g ~ species, data = penguins,
+main = "Body Mass and Species",
+ylab = "Body Mass (g)"
+)
+boxplot(
+flipper_length_mm ~ species, data = penguins,
+main = "Flipper Length and Species",
+ylab = "Flipper Length (mm)"
+)
+```
+
+
+```{r multi_panel_2, echo = FALSE, fig.width = 7, fig.height = 10}
+par(mfrow = c(2, 2))
+hist(
+penguins$body_mass_g,
+main = "Histogram of Body Mass",
+xlab = "Body Mass (g)")
+hist(
+penguins$flipper_length_mm,
+main = "Histogram of Flipper Length",
+xlab = "Flipper Length (mm)")
+boxplot(
+body_mass_g ~ species, data = penguins,
+main = "Body Mass and Species",
+ylab = "Body Mass (g)"
+)
+boxplot(
+flipper_length_mm ~ species, data = penguins,
+main = "Flipper Length and Species",
+ylab = "Flipper Length (mm)"
+)
+```
+
+
+# A New Section With Tabs {.tabset}
+
+## Tab 1
+
+Here's some text
+
+## Tab 2
+
+Here's some graphics:
+
+```{r tab_graph 1, echo = FALSE}
+boxplot(
+  flipper_length_mm ~ species, data = penguins,
+  main = "Flipper Length and Species",
+  ylab = "Flipper Length (mm)"
+)
+
+```
+
+## Tab 3
+
+Here's a numbered list:
+
+1. Item 1
+1. Item 2
+1. Item 3
+1. **Item 4** (in bold)
+
+# New 1st Level header (not there are no tabs)
+
+
+## Subsection 1
+
+This section is not in a tab
+
+## Subsection 2
+
+Still no tabs!
+
+# Tab Section 2 {.tabset .tabset-pills}
+
+This seciton uses a 'pill style' of tabs!
+
+## Tab 1
+
+Here's some text
+
+## Tab 2
+
+Here's some graphics:
+
+```{r tab_graph 1, echo = FALSE}
+boxplot(
+  flipper_length_mm ~ species, data = penguins,
+  main = "Flipper Length and Species",
+  ylab = "Flipper Length (mm)"
+)
+
+```
+
+## Tab 3
+
+Here's a numbered list:
+
+1. Item 1
+1. Item 2
+1. Item 3
+1. **Item 4** (in bold)
+

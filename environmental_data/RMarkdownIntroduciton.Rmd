@@ -1,0 +1,31 @@
+---
+title: "R Markdown Documents - Part 1"
+subtitle: "Analysis of Environmental Data"
+author: "Antonio Escallón"
+date: "9/25/2022"
+output: html_document
+---
+
+
+# Introduction
+
+Hi!
+
+My name is **Antonio Escallon** and I am currently a second semester junior here at UMass. I am majoring in *Computer Science and Environmental Science*
+
+
+
+# Concepts List
+
+* Concepts list
+  1. Hypothesis-Testing
+  2. Algorithm construction
+  3. Data visualization
+
+# Course List
+
+* Course list
+  + Discrete Mathematics 
+  + Spatial Data Analysis in R 
+  + Revolutionary Concepts in African American Music 
+
