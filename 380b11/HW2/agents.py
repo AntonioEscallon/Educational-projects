@@ -1,6 +1,6 @@
 import random
 import math
-
+import pdb;
 
 BOT_NAME =  "BOT" # INSERT NAME FOR YOUR BOT HERE OR IT WILL THROW AN EXCEPTION
 
@@ -178,6 +178,49 @@ class MinimaxLookaheadAgent(MinimaxAgent):
         """This is just a helper method for minimax(). Feel free to use it or not. """
         pass
 
+    def __get_row_threats(self, rows, player):
+        final_score = 0
+        for row in rows:
+            cnsc = 0
+            score = 0
+            i = 0
+            
+            while i < len(row): #iterate over the row
+                if row[i] == player: #if the current position holds our tile
+                    cnsc += 1 ##inrement number of consecutive tiles we've seen
+
+                elif row[i] != player: #if the current tile we're looking at isn't our piece
+                    if row[i] == -2 or row[i] == player*(-1): #if it's an obstacle or the other player's tile
+                        if cnsc >= 3: #if we have 3+ consecutive tiles of our players tiles
+                            score += cnsc**2 #add it to this row's score
+                        cnsc = 0 #reset the number of consecutive tiles of our player we've seen
+                    elif row[i] == 0: #otherwise if it's an empty space, see how many empty spaces are next to it
+                        j = i + 1 
+                        open_spaces = 1 #we know we already have at least one empty space
+                        while (j < len(row) and row[j] == 0): #while we have an empty space adjacent and haven't reached the end of the row
+                            open_spaces += 1 #increment the number of consecutive empty spaces we've seen
+                            j += 1 #move on to the next tile
+                            if j == (len(row)): #if we've reached the end of the row
+                                cnsc += open_spaces #add the number of consecutive open spaces we have to the number of consecutive of our player's tiles we have
+                                if cnsc >= 3: #if there are more than three
+                                    score += cnsc ** 2 #increment the row score
+                                final_score += score #add row score to final score
+                                score = 0 #reset the score
+                                open_spaces = 0 #reset the number of empty spaces we see
+                                cnsc = 0 #reset cnsc tiles
+                        cnsc += open_spaces #if at the end of row does nothing; otherwise, adds the number of empty spaces as potential consecutive tiles
+                        i = j #continue looking at the row from where we just left off looking
+                        continue
+                i += 1 #once we have looked at a tile, move onto the next
+
+            if score > 0: #if we have reached the end of a row and haven't had a chance to add the score yet, add it (ie in the case of player -1 and row [-1,0,0,1,0])
+                final_score += score
+            if cnsc >= 3: #if there are more than three consecutive tiles
+                score += cnsc ** 2 #increment the row score
+                final_score += score #add row score to final score
+        return final_score
+            
+
     def evaluation(self, state):
         """Estimate the utility value of the game state based on features.
 
@@ -189,9 +232,20 @@ class MinimaxLookaheadAgent(MinimaxAgent):
 
         Returns: a heuristic estimate of the utility value of the state
         """
+        rows = state.get_rows()
+        cols = state.get_cols()
+        diags = state.get_diags()
+        p1_score = 0
+        p2_score = 0
 
-        # Note: This cannot be "return state.utility() + c", where c is a constant. 
-        return 9  # Change this line!
+        if(len(rows) < 2) and (len(cols) < 2):
+            return 0
+
+        p1_score += self.__get_row_threats(rows, 1)
+        p2_score += self.__get_row_threats(rows, -1)
+
+       
+        return (p1_score - p2_score)  # Change this line!
 
 
 class AltMinimaxLookaheadAgent(MinimaxAgent):
