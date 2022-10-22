@@ -140,30 +140,32 @@ class Anagram(object):
         A += left[i:]
         A += right[j:]
         newString = newString + A[len(A) - 1]
-        print(len(newString))
+        
         if(len(newString) == length):
             print(newString)
 
         return A
 
 
-    def mergesort(self, A, length):
+    def mergesort(self, A, length, newString):
         A = list(A)
         if len(A) > 1:
             q = len(A) // 2
-            left = self.mergesort(A[:q], length)
-            right = self.mergesort(A[q:], length)
+            left = self.mergesort(A[:q], length, newString)
+            right = self.mergesort(A[q:], length, newString)
             return self.mergeString(left, right, length)
+        newString = newString + A[0]
+        print(A)
         return A
 
     def algo(self, inputList):
         finalList = []
+        newString = ''
         for elements in inputList:
             new_elements = list(elements)
-            print(new_elements, len(new_elements))
             length = len(new_elements)
-            finalList = finalList +  [self.mergesort(elements, length)]
-            print(elements)
+            finalList = finalList + [self.mergesort(elements, length, newString)]
+            print(finalList)
         return finalList
 
     
