@@ -139,10 +139,6 @@ class Anagram(object):
         #print(right[j:], "hmmm")
         A += left[i:]
         A += right[j:]
-        newString = newString + A[len(A) - 1]
-        
-        if(len(newString) == length):
-            print(newString)
 
         return A
 
@@ -153,21 +149,10 @@ class Anagram(object):
             q = len(A) // 2
             left = self.mergesort(A[:q], length, newString)
             right = self.mergesort(A[q:], length, newString)
-            return self.mergeString(left, right, length)
-        newString = newString + A[0]
-        print(A)
+            newList = self.mergeString(left, right, length)
+            return newList
+        
         return A
-
-    def algo(self, inputList):
-        finalList = []
-        newString = ''
-        for elements in inputList:
-            new_elements = list(elements)
-            length = len(new_elements)
-            finalList = finalList + [self.mergesort(elements, length, newString)]
-            print(finalList)
-        return finalList
-
     
     """   
    * Implement the algorithm here. Do not change the function signature.
@@ -176,28 +161,64 @@ class Anagram(object):
    * example: [['pots', 'stop', 'tops'], ['brake', 'break']]
     """
     def getAnagrams(self):
-        #Sort the letters on each string
-        #Sort the words in the dict
-        #Find the total number of times the anagram is repeated
-        #Revert back to the held dicitonary that was sorted, use the counted number of times that the word had an anagram and 
-        #add the next elements into the next # of elements into a specific list
-
-        #or
-
-        #For loop for first word
-        #For loop for second word
-        #Check that they're not the same word, then check that when they are sorted they are the same word. If both of these
-        #Things are true, then we will add these two elements into  specific list 
-
-        return []
+        inputList = list(self.dictionary)
+        finalList = []
+        newString = ''
+        newList = []
+        count = 0
+        for elements in inputList:
+            new_elements = list(elements)
+            length = len(new_elements)
+            finalList = finalList + [self.mergesort(elements, length, newString)]
+        for elements in finalList:
+            for letters in elements:
+                newString = newString + letters
+            newList = newList + [newString + ' ' + inputList[count]]
+            count += 1
+            newString = ''
+        
+        sortedFinalList = self.mergesort(newList, length, newString)
+        #print(sortedFinalList)
+        count = 0
+        createdList = []
+        theFinalList = []
+        oldElement = 'temp'
+        for elements in sortedFinalList:
+            count +=1
+            if ((elements.split(" ")[:1][0] != oldElement and oldElement != 'temp')):
+                theFinalList = theFinalList + [createdList]
+                oldElement = elements.split(" ")[:1][0]
+                createdList = []
+                createdList.append(elements.split(" ")[1:][0])
+            elif (oldElement == 'temp'):
+                createdList.append(elements.split(" ")[1:][0])
+                oldElement = elements.split(" ")[:1][0]
+            elif(count == len(sortedFinalList)):
+                createdList.append(elements.split(" ")[1:][0])
+                theFinalList = theFinalList + [createdList]
+            else:
+                createdList.append(elements.split(" ")[1:][0])
+            #print(elements, 'these are')
+            # if(count == 0):
+            #     if(sortedFinalList[count].split(" ")[:1][0] == sortedFinalList[count + 1].split(" ")[:1][0]):
+            #         finalElement = elements.split(" ")[:1][0]
+            #         createdList.append(finalElement)
+            #         theFinalList = theFinalList + [createdList]
+            # elif (sortedFinalList[count].split(" ")[:1][0] == sortedFinalList[count - 1].split(" ")[:1][0]):
+            #     finalElement = elements.split(" ")[:1][0]
+            #     createdList.append(finalElement)
+            #     theFinalList = theFinalList + [createdList]
+            # else:
+            #     theFinalList = theFinalList + [createdList]
+            # count+=1
+            # print(theFinalList)
+            #finalRealList = finalRealList + 
+        return theFinalList
 
 """
 You can use this for debugging if you wish.
 """
 if __name__ == "__main__":
-    pf = Anagram("dict3.txt")
-    print(pf.dictionary)
-    newDict = pf.algo(pf.dictionary)
-    #newDict = pf.mergesort(pf.dictionary)
+    pf = Anagram("dict1.txt")
+    newDict = pf.getAnagrams()
     print(newDict)
-    pf.getAnagrams()
