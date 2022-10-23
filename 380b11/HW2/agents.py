@@ -76,34 +76,26 @@ class MinimaxAgent:
     
     def maxHelper (self, state):
         child_list =[]
-        max = -100000
 
         if state.is_full():
             return state.utility()
 
-        for moves, child in state.successors():
+        for child in state.successors():
 
-            child_list.append(self.maxHelper(child))
-
-            max = max(child_list)  
+            child_list.append(self.minHelper(child[1]))
         
-        return max 
+        return max(child_list)  
     
     def minHelper(self, state):
-
         child_list =[]
-        min = 100000
 
         if state.is_full():
             return state.utility()
 
-        for moves, child in state.successors():
-
-            child_list.append(self.minHelper(child))
-
-            min = min(child_list)  
+        for child in state.successors():
+            child_list.append(self.maxHelper(child[1]))
         
-        return min 
+        return min(child_list)
 
 
 class MinimaxLookaheadAgent(MinimaxAgent):
@@ -118,36 +110,36 @@ class MinimaxLookaheadAgent(MinimaxAgent):
     
     def maxHelper (self, state, depth):
         child_list =[]
-        maxTemp = -100000
+        maxTemp = -math.inf
 
         if state.is_full():
             return state.utility()
         elif depth == 0:
             return self.evaluation(state)
 
-        for moves, child in state.successors():
+        for child in state.successors():
 
-            child_list.append(self.maxHelper(child, depth -1))
+            child_list.append(self.maxHelper(child[1], depth -1))
 
-            maxTemp = max(child_list)  
+        maxTemp = max(child_list)  
         
         return maxTemp 
     
     def minHelper(self, state, depth):
 
         child_list =[]
-        minTemp = 100000
+        minTemp = math.inf
 
         if state.is_full():
             return state.utility()
         elif depth == 0:
             return self.evaluation(state)
 
-        for moves, child in state.successors():
+        for child in state.successors():
 
-            child_list.append(self.minHelper(child, depth - 1))
+            child_list.append(self.minHelper(child[1], depth - 1))
 
-            minTemp = min(child_list)  
+        minTemp = min(child_list)  
         
         return minTemp
 
@@ -255,7 +247,6 @@ class MinimaxLookaheadAgent(MinimaxAgent):
 
         p1_score = self.__get_player_eval(state, 1)
         p2_score = self.__get_player_eval(state, -1)
-        pdb.set_trace()
         return (p1_score - p2_score)  # Change this line!
 
 
@@ -301,46 +292,42 @@ class MinimaxPruneAgent(MinimaxAgent):
         # Fill this in!
         #
         if state.next_player() == 1:
-            return self.maxAlphabeta(state, self.depth_limit, -100000, 10000)
+            return self.maxAlphabeta(state, -math.inf, math.inf)
         
         elif state.next_player() == -1:
-            return self.minAlphabeta(state, self.depth_limit, -100000, 10000)
+            return self.minAlphabeta(state, -math.inf, math.inf)
         # Change this line!
 
-    def maxAlphabeta(self, state, depth, alpha, beta):
+    def maxAlphabeta(self, state, alpha, beta):
         """This is just a helper method for minimax(). Feel free to use it or not."""
         child_list =[]
-        maxTemp = -100000
+        maxTemp = -math.inf
 
         if state.is_full():
             return state.utility()
-        elif depth == 0:
-            return self.evaluation(state)
 
-        for moves, child in state.successors():
+        for child in state.successors():
 
-            child_list.append(self.maxAlphabeta(child, depth -1, alpha, beta))
+            child_list.append(self.maxAlphabeta(child[1],alpha, beta))
 
             maxTemp  = max(child_list) 
             if maxTemp  >= beta:
                 return maxTemp 
-            alpha = max(alpha, maxTemp ) 
+            alpha = max(alpha, maxTemp) 
         
         return maxTemp 
     
-    def minAlphabeta(self, state, depth, alpha, beta):
+    def minAlphabeta(self, state, alpha, beta):
         """This is just a helper method for minimax(). Feel free to use it or not."""
         child_list =[]
-        minTemp = 100000
+        minTemp = math.inf
 
         if state.is_full():
             return state.utility()
-        elif depth == 0:
-            return self.evaluation(state)
 
-        for moves, child in state.successors():
+        for child in state.successors():
 
-            child_list.append(self.minAlphabeta(child, depth - 1, alpha, beta))
+            child_list.append(self.minAlphabeta(child[1], alpha, beta))
 
             minTemp = min(child_list)  
             if minTemp <= alpha:
