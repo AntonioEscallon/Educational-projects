@@ -301,10 +301,10 @@ class MinimaxPruneAgent(MinimaxAgent):
         # Fill this in!
         #
         if state.next_player() == 1:
-            return self.maxHelper(state, self.depth_limit, -100000, 10000)
+            return self.maxAlphabeta(state, self.depth_limit, -100000, 10000)
         
         elif state.next_player() == -1:
-            return self.minHelper(state, self.depth_limit, -100000, 10000)
+            return self.minAlphabeta(state, self.depth_limit, -100000, 10000)
         # Change this line!
 
     def maxAlphabeta(self, state, depth, alpha, beta):
@@ -319,12 +319,12 @@ class MinimaxPruneAgent(MinimaxAgent):
 
         for moves, child in state.successors():
 
-            child_list.append(self.maxHelper(child, depth -1, alpha, beta))
+            child_list.append(self.maxAlphabeta(child, depth -1, alpha, beta))
 
             maxTemp  = max(child_list) 
             if maxTemp  >= beta:
                 return maxTemp 
-            a = max(a, maxTemp ) 
+            alpha = max(alpha, maxTemp ) 
         
         return maxTemp 
     
@@ -340,7 +340,7 @@ class MinimaxPruneAgent(MinimaxAgent):
 
         for moves, child in state.successors():
 
-            child_list.append(self.minHelper(child, depth - 1, alpha, beta))
+            child_list.append(self.minAlphabeta(child, depth - 1, alpha, beta))
 
             minTemp = min(child_list)  
             if minTemp <= alpha:
@@ -348,10 +348,6 @@ class MinimaxPruneAgent(MinimaxAgent):
             beta = min(beta, minTemp)
     
         return minTemp
-    
-    def alphabeta(self, state,alpha, beta):
-        """This is just a helper method for minimax(). Feel free to use it or not."""
-        pass
 
 
 def get_agent(tag):
