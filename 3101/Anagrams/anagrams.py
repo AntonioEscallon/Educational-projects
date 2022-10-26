@@ -12,6 +12,12 @@ class Anagram(object):
         with open(filename) as handle:
             self.dictionary = set(w.strip() for w in handle)
 
+    def listMaker(self, firstSet):
+        a = []
+        for i in firstSet:
+            a.append(i)
+        return a
+
     # def mergeHelper(self, firstHalf, secondHalf, finalList = []):
     #     if len(firstHalf) == 0:
     #         return finalList + secondHalf
@@ -106,53 +112,53 @@ class Anagram(object):
     #         self.mergeHelper(inputSet, p, q, r)
 
     def merge(self, left, right):
-        A = []
+        newList = []
         i ,j = 0, 0
         while i < len(left) and j < len(right):
             if left[i] <= right[j]:
-                A.append(left[i])
+                newList.append(left[i])
                 i += 1
             else:
-                A.append(right[j])
+                newList.append(right[j])
                 j += 1
-        A += left[i:]
-        A += right[j:]
-        return A
+        newList += left[i:]
+        newList += right[j:]
+        return newList
     
     def mergeString(self, left, right, length):
-        A = []
+        newList = []
         newString = ''
         i ,j = 0, 0
         while i < len(left) and j < len(right):
             if left[i] <= right[j]:
-                A.append(left[i])
-                newString = newString + A[len(A) - 1]
+                newList.append(left[i])
+                newString = newString + newList[len(newList) - 1]
                 #print(newString)
                 i += 1
             else:
-                A.append(right[j])
-                newString = newString + A[len(A) - 1]
+                newList.append(right[j])
+                newString = newString + newList[len(newList) - 1]
                 #print(newString)
                 #print(A)
                 j += 1
         #print(left[i:], 'hm')
         #print(right[j:], "hmmm")
-        A += left[i:]
-        A += right[j:]
+        newList += left[i:]
+        newList += right[j:]
 
-        return A
+        return newList
 
 
-    def mergesort(self, A, length, newString):
-        A = list(A)
-        if len(A) > 1:
-            q = len(A) // 2
-            left = self.mergesort(A[:q], length, newString)
-            right = self.mergesort(A[q:], length, newString)
+    def mergesort(self, newList, length, newString):
+        newList = self.listMaker(newList)
+        if len(newList) > 1:
+            q = len(newList) // 2
+            left = self.mergesort(newList[:q], length, newString)
+            right = self.mergesort(newList[q:], length, newString)
             newList = self.mergeString(left, right, length)
             return newList
         
-        return A
+        return newList
     
     """   
    * Implement the algorithm here. Do not change the function signature.
@@ -161,13 +167,13 @@ class Anagram(object):
    * example: [['pots', 'stop', 'tops'], ['brake', 'break']]
     """
     def getAnagrams(self):
-        inputList = list(self.dictionary)
+        inputList = self.listMaker(self.dictionary)
         finalList = []
         newString = ''
         newList = []
         count = 0
         for elements in inputList:
-            new_elements = list(elements)
+            new_elements = self.listMaker(elements)
             length = len(new_elements)
             finalList = finalList + [self.mergesort(elements, length, newString)]
         for elements in finalList:
@@ -219,6 +225,6 @@ class Anagram(object):
 You can use this for debugging if you wish.
 """
 if __name__ == "__main__":
-    pf = Anagram("dict1.txt")
-    newDict = pf.getAnagrams()
-    print(newDict)
+    pf = Anagram("dict3.txt")
+    #newDict = pf.getAnagrams()
+   # print(newDict)
