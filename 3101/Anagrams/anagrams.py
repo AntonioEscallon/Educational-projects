@@ -78,6 +78,7 @@ class Anagram(object):
             new_elements = self.listMaker(elements)
             length = len(new_elements)
             finalList = finalList + [self.mergesort(elements, length, newString)]
+
         for elements in finalList:
             for letters in elements:
                 newString = newString + letters
@@ -105,6 +106,7 @@ class Anagram(object):
                 theFinalList = theFinalList + [createdList]
             else:
                 createdList.append(elements.split(" ")[1:][0])
+
         return theFinalList
 
 """
@@ -112,3 +114,4 @@ You can use this for debugging if you wish.
 """
 if __name__ == "__main__":
     pf = Anagram("dict3.txt")
+    pf.getAnagrams()
