@@ -69,16 +69,19 @@ class Anagram(object):
    * example: [['pots', 'stop', 'tops'], ['brake', 'break']]
     """
     def getAnagrams(self):
+        #Step 1
         inputList = self.listMaker(self.dictionary)
         finalList = []
         newString = ''
         newList = []
         count = 0
+        #Step 2
         for elements in inputList:
             new_elements = self.listMaker(elements)
             length = len(new_elements)
             finalList = finalList + [self.mergesort(elements, length, newString)]
 
+        #Step 3
         for elements in finalList:
             for letters in elements:
                 newString = newString + letters
@@ -86,19 +89,22 @@ class Anagram(object):
             count += 1
             newString = ''
         
+        #Step 4
         sortedFinalList = self.mergesort(newList, length, newString)
         count = 0
         createdList = []
         theFinalList = []
-        oldElement = 'temp'
+        oldElement = ''
+
+        #Step 5
         for elements in sortedFinalList:
             count +=1
-            if ((elements.split(" ")[:1][0] != oldElement and oldElement != 'temp')):
+            if ((elements.split(" ")[:1][0] != oldElement and oldElement != '')):
                 theFinalList = theFinalList + [createdList]
                 oldElement = elements.split(" ")[:1][0]
                 createdList = []
                 createdList.append(elements.split(" ")[1:][0])
-            elif (oldElement == 'temp'):
+            elif (oldElement == ''):
                 createdList.append(elements.split(" ")[1:][0])
                 oldElement = elements.split(" ")[:1][0]
             elif(count == len(sortedFinalList)):
@@ -114,4 +120,5 @@ You can use this for debugging if you wish.
 """
 if __name__ == "__main__":
     pf = Anagram("dict3.txt")
-    pf.getAnagrams()
+    newList = pf.getAnagrams()
+    print(newList)
