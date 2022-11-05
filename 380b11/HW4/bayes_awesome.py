@@ -1,5 +1,6 @@
 import random
 from matplotlib import pyplot as plt
+import pdb
 
 
 class BooleanVariableNode(object):
@@ -68,11 +69,25 @@ class SimpleSampler(object):
         # 
         # Fill in the function body here
         #
-        for keys in query_vals:
-            if(query_vals[keys] == True):
-                print('nice')
+        event = 0
+        samples = []
+        for i in range(num_samples):
+            samples.append(self.generate_sample())
+        
+        # for keys in query_vals:
+        #     if(query_vals[keys] == True):
+        #         print('nice')
+        
+        for i in range(len(samples)):
+            sample = samples[i]
+            satisfied = True
+            for keys in query_vals:
+                if sample[keys] != query_vals[keys]:
+                    satisfied = False
+            if satisfied:
+                event += 1
                 
-        return 0.0  # Fix this line!
+        return (event/num_samples)  # Fix this line!
 
         
 class RejectionSampler(SimpleSampler):
@@ -93,8 +108,30 @@ class RejectionSampler(SimpleSampler):
         # 
         # Fill in the function body here
         #
+        samples = []
+        event = 0
+        for i in range(num_samples):
+            sample = self.generate_sample()
+            add = True
+            for key in evidence_vals:
+                if sample[key] != evidence_vals[key]:
+                    add = False
+            if add:
+                samples.append(sample)
+        
+        if(len(samples)) == 0:
+            return None
+        
+        for i in range(len(samples)):
+            sample = samples[i]
+            satisfied = True
+            for keys in query_vals:
+                if sample[keys] != query_vals[keys]:
+                    satisfied = False
+            if satisfied:
+                event += 1
 
-        return 0.0  # Fix this line!
+        return event/len(samples)  # Fix this line!
 
 
 class LikelihoodWeightingSampler(SimpleSampler):
