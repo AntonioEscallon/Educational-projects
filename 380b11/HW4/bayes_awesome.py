@@ -59,7 +59,6 @@ class SimpleSampler(object):
         
     def get_prob(self, query_vals, num_samples):
         """Return the (joint) probability of the query variables.
-        
         Args:
             query_vals: dictionary mapping variable => value 
             num_samples: number of simple samples to generate for the calculation
@@ -69,6 +68,10 @@ class SimpleSampler(object):
         # 
         # Fill in the function body here
         #
+        for keys in query_vals:
+            if(query_vals[keys] == True):
+                print('nice')
+                
         return 0.0  # Fix this line!
 
         
@@ -90,6 +93,7 @@ class RejectionSampler(SimpleSampler):
         # 
         # Fill in the function body here
         #
+
         return 0.0  # Fix this line!
 
 
@@ -206,25 +210,25 @@ if __name__ == '__main__':
 
     # Approximate some of the probabilities we've been thinking about
     print("a. P(enrolled)")
-    compare_estimates({'E': True}, {})
+    compare_estimates({'E': True}, {}, n, sampler_simp, sampler_reject, sampler_like)
 
     print("b. P(moxie | -palate)")
-    compare_estimates({'M': True}, {'P': False})
+    compare_estimates({'M': True}, {'P': False}, n, sampler_simp, sampler_reject, sampler_like)
 
     print("c. P(moxie)")
-    compare_estimates({'M': True}, {})
+    compare_estimates({'M': True}, {}, n, sampler_simp, sampler_reject, sampler_like)
     
     print("d. P(moxie, awesome)")
-    compare_estimates({'M': True, 'A': True}, {})
+    compare_estimates({'M': True, 'A': True}, {}, n, sampler_simp, sampler_reject, sampler_like)
 
     print("e. P(awesome)")
-    compare_estimates({'A': True}, {})
+    compare_estimates({'A': True}, {}, n, sampler_simp, sampler_reject, sampler_like)
 
     print("f. P(-palate | moxie)")
-    compare_estimates({'P': False}, {'M': True})
+    compare_estimates({'P': False}, {'M': True}, n, sampler_simp, sampler_reject, sampler_like)
     
     print("g. P(-palate | moxie, -enrolled)")
-    compare_estimates({'P': False}, {'M': True, 'E': False})
+    compare_estimates({'P': False}, {'M': True, 'E': False}, n, sampler_simp, sampler_reject, sampler_like)
 
 
     # Create a plot illustrating how different samplers converge as a function of n
