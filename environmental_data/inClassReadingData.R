@@ -39,10 +39,44 @@ pnorm(3.2, mean = 2, sd = 2)
 log(dbinom(2, 6, 0.368))
 sum(log(dbinom(2, 6, 0.368)))
 set.seed(1)
-vec_rnorm = rnorm(n = 10, mean = 0, sd = 1)
+vec_rnorm = rnorm(n = 10, mean = 0.2, sd = 0.2)
 
-like = dnorm(vec_rnorm, 0, 0.1)
+like = dnorm(vec_rnorm, 0, 2)
+
+like
 
 log_vec = sum(log(like))
 
 log_vec
+
+require(palmerpenguins)
+
+dat_ade = droplevels(subset(penguins, species == "Adelie"))
+
+hist(dat_ade$body_mass_g, main = "Adelie Penguins: Body Mass", xlab = "body mass (g)")
+
+boxplot(body_mass_g ~ sex, data= dat_ade, main = "Adelie Penguins: Body Mass", xlab = "body mass (g)")
+
+dat_pen = droplevels(subset(penguins, species == "Adelie"))
+
+head(dat_pen)
+
+dat_ade_male = subset(dat_ade, sex == "male")
+
+dat_ade_female = subset(dat_ade, sex == "female")
+
+
+dat_pen_sex = droplevels(subset(penguins, sex == "male"))
+
+head(dat_pen_sex)
+
+t.test(dat_ade_male$body_mass_g, y=dat_ade_female$body_mass_g)
+
+t.test(x = dat_ade_male$body_mass_g, y=dat_ade_female$body_mass_g)
+
+t.test(dat_ade$body_mass_g~ dat_ade$sex, alternative="greater" )
+
+
+
+
+
