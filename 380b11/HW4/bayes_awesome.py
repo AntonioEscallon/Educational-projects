@@ -3,6 +3,7 @@ import random
 from typing import final
 from matplotlib import pyplot as plt
 import matplotlib
+import pdb
 
 
 class BooleanVariableNode(object):
@@ -110,7 +111,7 @@ class RejectionSampler(SimpleSampler):
         #
         samples = []
         event = 0
-        print(query_vals)
+        # print(query_vals)
         for i in range(num_samples):
             sample = self.generate_sample()
             add = True
@@ -189,15 +190,18 @@ class LikelihoodWeightingSampler(SimpleSampler):
         # for keys in query_vals:
         #     if(query_vals[keys] == True):
         #         print('nice')
-        
+        # pdb.set_trace()
         for i in range(len(samples)):
             sample = samples[i]
             weight = weights[i]
+            add = True
             for keys in query_vals:
-                if (sample[keys] == query_vals[keys]):
+                if (sample[keys] != query_vals[keys]):
                     #print(keys, query_vals, weight)
+                    add = False    
+            if add:
                     finalWeights = finalWeights + weight
-                totalWeight = totalWeight + weight
+            totalWeight = totalWeight + weight
 
 
         # for i in range(num_samples):
