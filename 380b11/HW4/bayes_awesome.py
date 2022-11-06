@@ -3,7 +3,6 @@ import random
 from typing import final
 from matplotlib import pyplot as plt
 import matplotlib
-import pdb
 
 
 class BooleanVariableNode(object):
@@ -68,17 +67,11 @@ class SimpleSampler(object):
             num_samples: number of simple samples to generate for the calculation
         Returns: empirical probability of query values
         """
-        # 
-        # Fill in the function body here
-        #
         event = 0
         samples = []
         for i in range(num_samples):
             samples.append(self.generate_sample())
         
-        # for keys in query_vals:
-        #     if(query_vals[keys] == True):
-        #         print('nice')
         
         for i in range(len(samples)):
             sample = samples[i]
@@ -105,13 +98,9 @@ class RejectionSampler(SimpleSampler):
                 "kept" that agree with evidence will be significantly lower)
         Returns: empirical conditional probability of query values given evidence.  N.B.: if 
         all of the generated samples are rejected, it returns None.
-        """
-        # 
-        # Fill in the function body here
-        #
+        """   
         samples = []
         event = 0
-        # print(query_vals)
         for i in range(num_samples):
             sample = self.generate_sample()
             add = True
@@ -175,9 +164,6 @@ class LikelihoodWeightingSampler(SimpleSampler):
 
         Returns: empirical conditional probability of query values given evidence
         """
-        # 
-        # Fill in the function body here
-        #
         weights = []
         samples = []
         finalWeights = 0
@@ -187,10 +173,6 @@ class LikelihoodWeightingSampler(SimpleSampler):
             samples.append(temp_sample)
             weights.append(temp_weight)
         
-        # for keys in query_vals:
-        #     if(query_vals[keys] == True):
-        #         print('nice')
-        # pdb.set_trace()
         for i in range(len(samples)):
             sample = samples[i]
             weight = weights[i]
@@ -202,18 +184,6 @@ class LikelihoodWeightingSampler(SimpleSampler):
             if add:
                     finalWeights = finalWeights + weight
             totalWeight = totalWeight + weight
-
-
-        # for i in range(num_samples):
-        #     samples, weight = self.generate_sample(evidence_vals)
-        #     key =  list(samples.keys())[i]
-        #     values = list(samples.values())[i]
-        #     print(samples)
-        #     print(query_vals)
-        #     if not (key == qKey and values == qVal):
-        #         weights[0] = weights[0] + weight
-        #     else:
-        #         weights[1] = weights[1] + weight
 
         return finalWeights/totalWeight
 
