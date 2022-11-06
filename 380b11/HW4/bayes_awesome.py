@@ -1,5 +1,8 @@
+from lib2to3.pgen2.pgen import generate_grammar
 import random
+from typing import final
 from matplotlib import pyplot as plt
+import matplotlib
 
 
 class BooleanVariableNode(object):
@@ -62,17 +65,30 @@ class SimpleSampler(object):
         Args:
             query_vals: dictionary mapping variable => value 
             num_samples: number of simple samples to generate for the calculation
-
         Returns: empirical probability of query values
         """
         # 
         # Fill in the function body here
         #
-        for keys in query_vals:
-            if(query_vals[keys] == True):
-                print('nice')
+        event = 0
+        samples = []
+        for i in range(num_samples):
+            samples.append(self.generate_sample())
+        
+        # for keys in query_vals:
+        #     if(query_vals[keys] == True):
+        #         print('nice')
+        
+        for i in range(len(samples)):
+            sample = samples[i]
+            satisfied = True
+            for keys in query_vals:
+                if sample[keys] != query_vals[keys]:
+                    satisfied = False
+            if satisfied:
+                event += 1
                 
-        return 0.0  # Fix this line!
+        return (event/num_samples)  # Fix this line!
 
         
 class RejectionSampler(SimpleSampler):
@@ -86,15 +102,37 @@ class RejectionSampler(SimpleSampler):
             evidence_vals: dictionary mapping variable => value
             num_samples: number of simple samples to generate for the calculation (the number
                 "kept" that agree with evidence will be significantly lower)
-
         Returns: empirical conditional probability of query values given evidence.  N.B.: if 
         all of the generated samples are rejected, it returns None.
         """
         # 
         # Fill in the function body here
         #
+        samples = []
+        event = 0
+        print(query_vals)
+        for i in range(num_samples):
+            sample = self.generate_sample()
+            add = True
+            for key in evidence_vals:
+                if sample[key] != evidence_vals[key]:
+                    add = False
+            if add:
+                samples.append(sample)
+        
+        if(len(samples)) == 0:
+            return None
+        
+        for i in range(len(samples)):
+            sample = samples[i]
+            satisfied = True
+            for keys in query_vals:
+                if sample[keys] != query_vals[keys]:
+                    satisfied = False
+            if satisfied:
+                event += 1
 
-        return 0.0  # Fix this line!
+        return event/len(samples)  # Fix this line!
 
 
 class LikelihoodWeightingSampler(SimpleSampler):
@@ -139,7 +177,41 @@ class LikelihoodWeightingSampler(SimpleSampler):
         # 
         # Fill in the function body here
         #
-        return 0.0  # Fix this line!
+        weights = []
+        samples = []
+        finalWeights = 0
+        totalWeight = 0
+        for i in range(num_samples):
+            temp_sample, temp_weight = self.generate_sample(evidence_vals)
+            samples.append(temp_sample)
+            weights.append(temp_weight)
+        
+        # for keys in query_vals:
+        #     if(query_vals[keys] == True):
+        #         print('nice')
+        
+        for i in range(len(samples)):
+            sample = samples[i]
+            weight = weights[i]
+            for keys in query_vals:
+                if (sample[keys] == query_vals[keys]):
+                    #print(keys, query_vals, weight)
+                    finalWeights = finalWeights + weight
+                totalWeight = totalWeight + weight
+
+
+        # for i in range(num_samples):
+        #     samples, weight = self.generate_sample(evidence_vals)
+        #     key =  list(samples.keys())[i]
+        #     values = list(samples.values())[i]
+        #     print(samples)
+        #     print(query_vals)
+        #     if not (key == qKey and values == qVal):
+        #         weights[0] = weights[0] + weight
+        #     else:
+        #         weights[1] = weights[1] + weight
+
+        return finalWeights/totalWeight
 
 
 def compare_estimates(query, evidence, n, simp, rej, like):
