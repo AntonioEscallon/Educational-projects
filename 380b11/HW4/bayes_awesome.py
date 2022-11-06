@@ -3,6 +3,7 @@ import random
 from typing import final
 from matplotlib import pyplot as plt
 import matplotlib
+import pdb
 
 
 class BooleanVariableNode(object):
@@ -213,6 +214,20 @@ def bayes_sample_size_plot(sampler1, sampler2, query, evidence, label1, label2, 
     # 
     # Fill in the function body here
     #
+
+    # pdb.set_trace()
+    i = 50
+    num_samples = []
+    rejections = []
+    likelihoods = []
+    while(i < 10000):
+        num_samples.append(i)
+        y1 = sampler1.get_prob(query, evidence, i)
+        y2 = sampler2.get_prob(query, evidence, i)
+        rejections.append(y1)
+        likelihoods.append(y2)
+        i += 20
+    two_line_plot(num_samples, rejections, label1,num_samples, likelihoods, label2, title, fname)
     return
 
 
