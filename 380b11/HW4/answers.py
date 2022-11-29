@@ -23,7 +23,7 @@ def q1_and_2():
     # TODO: Fill these in.
 
     num_convergance_utility = 10
-    num_convergance_policy = 5
+    num_convergance_policy = 4
 
     return {"gridworld": gridworld, "epsilon": epsilon,
         "discount_factor": discount_factor, "utilities": utilities,
