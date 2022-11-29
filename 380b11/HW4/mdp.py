@@ -109,34 +109,31 @@ def value_iteration(mdp, gamma, epsilon):
     util_dict = {}
     matrix = mdp
     eps_value = True
-    while eps_value:
-        eps_value = False
-        for values in matrix.get_states():
-            next_val = -math.inf
-            util_val = matrix.get_reward(values)
-            if matrix.is_terminal(values):
-                util_dict[values] = util_val
-                continue   
-            for action in matrix.get_actions(values):
-                neighbor = 0
-                prob_s = matrix.get_successor_probs(values, action)
-                for successor, probability in prob_s.items():
-                    neighbor += (probability * matrix.get_reward(successor))
-                if neighbor > next_val:
-                    next_val = neighbor
-            temp_utilities = mdp.get_reward(values) + (gamma* max(util_val, next_val))
-            util_dict[values] = temp_utilities
-            if abs(temp_utilities - util_val) > epsilon:
-                eps_value = True
-        matrix = MDP(mdp.nrows, mdp.ncols, util_dict.copy(), mdp.terminals, mdp.prob_forw, mdp.reward_def)
     
+
+    while eps_value: #while we still haven't converged
+        eps_value = False #set it to false
+        for values in matrix.get_states(): #for each state
+            next_val = -math.inf #set the next best value of that state to negative infinity
+            util_val = matrix.get_reward(values) #set the utility to the reward of that state
+            if matrix.is_terminal(values): #if that state is a terminal state
+                util_dict[values] = util_val #set the terminal states utility in the utility dictionary to its reward
+                continue   #move onto the next state
+            for action in matrix.get_actions(values): #for each action of the relevant non-terminal state 
+                neighbor = 0 #set the utility of that action to that state
+                prob_s = matrix.get_successor_probs(values, action) #get all of the possible successors of taking that action
+                for successor, probability in prob_s.items(): 
+                    neighbor += (probability * matrix.get_reward(successor)) #add the probability of taking that action*the reward of taking that action
+                if neighbor > next_val: #if the calculated utility of the state is better than its the next best value
+                    next_val = neighbor #set the next best value equal to that of the utility you just calculated
+            temp_utilities = mdp.get_reward(values) + (gamma* max(util_val, next_val)) #utility of the state is eqal to  gamma*(max of the previously calculated utility value and the newly calculated utility) + the reward of that state
+            util_dict[values] = temp_utilities #set the record utility of that state in the dictionary
+            if abs(temp_utilities - util_val) > epsilon: #if the difference between the newly calculated utility and the previous one is greater than episilon, we have not converged
+                eps_value = True
+        matrix = MDP(mdp.nrows, mdp.ncols, util_dict.copy(), mdp.terminals, mdp.prob_forw, mdp.reward_def) #update the MDP
+        
     return util_dict
 
-
-
-
-
-    pass
 
 
 def derive_policy(mdp, utility):
