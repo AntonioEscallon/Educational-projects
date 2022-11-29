@@ -128,7 +128,7 @@ def value_iteration(mdp, gamma, epsilon):
             util_dict[values] = temp_utilities
             if abs(temp_utilities - util_val) > epsilon:
                 eps_value = True
-        matrix = MDP(mdp.nrows, mdp.ncols, util_dict.copy(), mdp.terminals, mdp.prob_frow, mdp.reward_def)
+        matrix = MDP(mdp.nrows, mdp.ncols, util_dict.copy(), mdp.terminals, mdp.prob_forw, mdp.reward_def)
     
     return util_dict
 
