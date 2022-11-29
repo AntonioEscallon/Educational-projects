@@ -11,9 +11,12 @@ def q1_and_2():
     # TODO: Replace the None values here based on the questions in the PDF.
     #       DO NOT change anything besides these None values when you submit.
     #       However, you may add print statements if it helps.
-    gridworld = None
-    epsilon = None
-    discount_factor = None
+    gridworld = mdp.MDP(2, 3,
+                    rewards={ (2, 2): -10, (1, 2):  -1, (1,1): -1, (3,1): -1, (2,1): -1 },
+                    terminals=[(2, 3)],
+                    prob_forw=0.8)
+    epsilon = 0.01
+    discount_factor = 0.8
 
     print("\n", '─' * 50, "\n", "Question 1 and 2")
     utilities, policy = mdp.utils_and_policy(gridworld, discount_factor, epsilon)
