@@ -3,6 +3,7 @@ import random
 from typing import final
 from matplotlib import pyplot as plt
 import matplotlib
+import pdb
 
 
 class BooleanVariableNode(object):
@@ -67,17 +68,11 @@ class SimpleSampler(object):
             num_samples: number of simple samples to generate for the calculation
         Returns: empirical probability of query values
         """
-        # 
-        # Fill in the function body here
-        #
         event = 0
         samples = []
         for i in range(num_samples):
             samples.append(self.generate_sample())
         
-        # for keys in query_vals:
-        #     if(query_vals[keys] == True):
-        #         print('nice')
         
         for i in range(len(samples)):
             sample = samples[i]
@@ -104,13 +99,9 @@ class RejectionSampler(SimpleSampler):
                 "kept" that agree with evidence will be significantly lower)
         Returns: empirical conditional probability of query values given evidence.  N.B.: if 
         all of the generated samples are rejected, it returns None.
-        """
-        # 
-        # Fill in the function body here
-        #
+        """   
         samples = []
         event = 0
-        print(query_vals)
         for i in range(num_samples):
             sample = self.generate_sample()
             add = True
@@ -174,9 +165,6 @@ class LikelihoodWeightingSampler(SimpleSampler):
 
         Returns: empirical conditional probability of query values given evidence
         """
-        # 
-        # Fill in the function body here
-        #
         weights = []
         samples = []
         finalWeights = 0
@@ -186,30 +174,17 @@ class LikelihoodWeightingSampler(SimpleSampler):
             samples.append(temp_sample)
             weights.append(temp_weight)
         
-        # for keys in query_vals:
-        #     if(query_vals[keys] == True):
-        #         print('nice')
-        
         for i in range(len(samples)):
             sample = samples[i]
             weight = weights[i]
+            add = True
             for keys in query_vals:
-                if (sample[keys] == query_vals[keys]):
+                if (sample[keys] != query_vals[keys]):
                     #print(keys, query_vals, weight)
+                    add = False    
+            if add:
                     finalWeights = finalWeights + weight
-                totalWeight = totalWeight + weight
-
-
-        # for i in range(num_samples):
-        #     samples, weight = self.generate_sample(evidence_vals)
-        #     key =  list(samples.keys())[i]
-        #     values = list(samples.values())[i]
-        #     print(samples)
-        #     print(query_vals)
-        #     if not (key == qKey and values == qVal):
-        #         weights[0] = weights[0] + weight
-        #     else:
-        #         weights[1] = weights[1] + weight
+            totalWeight = totalWeight + weight
 
         return finalWeights/totalWeight
 
@@ -239,6 +214,20 @@ def bayes_sample_size_plot(sampler1, sampler2, query, evidence, label1, label2, 
     # 
     # Fill in the function body here
     #
+
+    # pdb.set_trace()
+    i = 50
+    num_samples = []
+    rejections = []
+    likelihoods = []
+    while(i < 10000):
+        num_samples.append(i)
+        y1 = sampler1.get_prob(query, evidence, i)
+        y2 = sampler2.get_prob(query, evidence, i)
+        rejections.append(y1)
+        likelihoods.append(y2)
+        i += 20
+    two_line_plot(num_samples, rejections, label1,num_samples, likelihoods, label2, title, fname)
     return
 
 
