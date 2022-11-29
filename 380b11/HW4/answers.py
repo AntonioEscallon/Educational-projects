@@ -20,10 +20,10 @@ def q1_and_2():
 
     print("\n", '─' * 50, "\n", "Question 1 and 2")
     utilities, policy = mdp.utils_and_policy(gridworld, discount_factor, epsilon)
-
     # TODO: Fill these in.
+
     num_convergance_utility = 10
-    num_convergance_policy = 4
+    num_convergance_policy = 5
 
     return {"gridworld": gridworld, "epsilon": epsilon,
         "discount_factor": discount_factor, "utilities": utilities,
