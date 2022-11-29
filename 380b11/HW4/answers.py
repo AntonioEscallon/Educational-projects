@@ -12,8 +12,8 @@ def q1_and_2():
     #       DO NOT change anything besides these None values when you submit.
     #       However, you may add print statements if it helps.
     gridworld = mdp.MDP(2, 3,
-                    rewards={ (2, 2): -10, (1, 2):  -1, (1,1): -1, (3,1): -1, (2,1): -1 },
-                    terminals=[(2, 3)],
+                    rewards={ (2, 2): -10, (1, 2):  -1, (1,1): -1, (3,1): -1, (2,1): -1, (3,2): 20 },
+                    terminals=[(3, 2)],
                     prob_forw=0.8)
     epsilon = 0.01
     discount_factor = 0.8
@@ -102,7 +102,7 @@ if __name__ == "__main__":
                     terminals=[(1, 2), (3, 2)],
                     prob_forw=0.8)
     epsilon = 0.01
-    discount_factor = 0.9
+    discount_factor = 0.8
     utilities = mdp.utils_and_policy(gridworld_example, discount_factor, epsilon)
 
     # Questions

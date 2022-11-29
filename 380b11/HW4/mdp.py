@@ -110,9 +110,9 @@ def value_iteration(mdp, gamma, epsilon):
     matrix = mdp
     eps_value = True
     while eps_value:
-        next_val = -math.inf
         eps_value = False
         for values in matrix.get_states():
+            next_val = -math.inf
             util_val = matrix.get_reward(values)
             if matrix.is_terminal(values):
                 util_dict[values] = util_val
