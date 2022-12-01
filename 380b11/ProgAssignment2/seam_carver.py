@@ -54,7 +54,7 @@ def compute_energy(image: np.ndarray):
     # --------------------- TODO -------------------------------
 
     # Begin your work here
-
+    print(np.ndarray)
     # Delete this line after you implemented your algorithm!
     return np.zeros(image.shape[:-1])
 
