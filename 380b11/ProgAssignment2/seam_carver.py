@@ -54,9 +54,33 @@ def compute_energy(image: np.ndarray):
     # --------------------- TODO -------------------------------
 
     # Begin your work here
-    print(np.ndarray)
+    #print(image.shape[0],image.shape[1], image.shape[2])
+    height = image.shape[0]
+    width = image.shape[1]
+    energy = np.empty((height, width))
+    for i in range(height):
+        for j in range(width):
+            #Accounting for the edge cases. Not sure if this works tho
+            if(i == 0 or j == 0 or i == (height - 1) or j == (width -1)):
+                energy[0,j] == 1000
+                energy[i,0] == 1000
+                energy[height - 1, j] == 1000
+                energy[i, width - 1] == 1000
+            else:
+                L = image[i, (j-1) % width]
+                R = image[i, (j+1) % width]
+                U = image[(i-1) % height, j]
+                D = image[(i+1) % height, j]
+            # #This part works
+            #     L = image[i, (j-1)]
+            #     R = image[i, (j+1)]
+            #     U = image[(i-1), j]
+            #     D = image[(i+1), j]
+                dx_sq = np.sum((R - L)**2)
+                dy_sq = np.sum((D - U)**2)
+                energy[i,j] = np.sqrt(dx_sq + dy_sq)
+    return energy
     # Delete this line after you implemented your algorithm!
-    return np.zeros(image.shape[:-1])
 
     # --------------------- END TODO ---------------------------
 
@@ -77,7 +101,6 @@ def find_vertical_seam(image: np.ndarray, energy=None):
         An (image height, ) sized array of integers ranging between
         [0, image width - 1]
     """
-
     # compute energy if not provided.
     if energy is None:
         energy = compute_energy(image)
@@ -96,7 +119,7 @@ def find_vertical_seam(image: np.ndarray, energy=None):
         energy = energy + noise
         # Reverting the random state to what we started with
         np.random.set_state(random_state)
-
+    
     # --------------------- TODO -------------------------------
 
     # Adapt an efficient path-finding algorithm to find the seam with the
@@ -118,8 +141,48 @@ def find_vertical_seam(image: np.ndarray, energy=None):
 
     # Begin your work here
 
+    #For the first row, assign the energy value as seam value of the pixels S[1,j] = E[1,j]
+    #For the next rows, propagate the minimum seam from the neighbors of the pixel downwards: S[i,j] = E[i,j] + min( S[i-1,j-1], S[i-1,j], S[i-1,j+1] )
+    #Start from the element with minimum value in the last row of S and climb up by choosing neighbors with minimum seam values. Store each step.
+    #The path you have stored is the seam with minimum energy.
+
+    height = image.shape[0]
+    width = image.shape[1]
+    seam  = np.empty((height, width))
+    for i in range(height - 1):
+        for j in range(width - 1):
+            if(i == 1):
+                #Keeping all the values of the first pixel in the image
+                seam[i, j] = energy[i, j]
+            else:
+                #Finding the min value for the next pixel and adding that to the path. The path with the lowest value will be the one where we get the min path from
+                #We then go backwards on how we built this path. 
+                seam[i, j] = energy[i,j] + min( seam[i-1, j-1], seam[i-1, j], seam[i-1, j+1])
+    #Min element in the last row
+    #Getting the J values and finding the near elements of the min row
+    minVal = min(seam[height - 1, :])
+    print(minVal)
+    print(np.where(seam == min(seam[height - 1, :])))
+    #print([val, indJ])
+    seamEnergy = minVal 
+    optimalPath  = np.empty((height, width))
+
+    #Save the Optimal Path. We backtrack our steps in order to know how we created the smallest value of the path and then getting the specific path
+    for i in range(height - 1):
+        for j in range(width - 1):
+            #Converrt the value of the square behind us
+            optimalPath[i, indJ - 1] = 1
+            #Finding the min in the seams that are above our given seam
+            [val, indIncr] = min(seam[i-1, j-1], seam[i-1, j], seam[i-1, j+1])
+            #Adding the seam energy 
+            seamEnergy = seamEnergy + val
+            indJ = indJ + (indIncr - 2)
+    
+    #optimalPath[1, indJ - 1] = 1
+    #optimalPath = not optimalPath
     # Delete this line after you implemented your algorithm!
-    return np.zeros(energy.shape[0], dtype=int)
+
+    return optimalPath
 
     # --------------------- END TODO ---------------------------
 
