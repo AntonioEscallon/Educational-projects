@@ -158,26 +158,26 @@ def find_vertical_seam(image: np.ndarray, energy=None):
                 #Finding the min value for the next pixel and adding that to the path. The path with the lowest value will be the one where we get the min path from
                 #We then go backwards on how we built this path. 
                 seam[i, j] = energy[i,j] + min( seam[i-1, j-1], seam[i-1, j], seam[i-1, j+1])
+    
     #Min element in the last row
     #Getting the J values and finding the near elements of the min row
-    minVal = min(seam[height - 1, :])
-    print(minVal)
-    print(np.where(seam == min(seam[height - 1, :])))
+    minVal = np.min(seam, axis = height - 1)
+    #Getting the index value of the least valuable object in the last row
+    minJ = np.argmin(seam, axis = height - 1)
+    print(minJ, 'hm')
     #print([val, indJ])
     seamEnergy = minVal 
     optimalPath  = np.empty((height, width))
 
     #Save the Optimal Path. We backtrack our steps in order to know how we created the smallest value of the path and then getting the specific path
-    for i in range(height - 1):
-        for j in range(width - 1):
-            #Converrt the value of the square behind us
-            optimalPath[i, indJ - 1] = 1
-            #Finding the min in the seams that are above our given seam
-            [val, indIncr] = min(seam[i-1, j-1], seam[i-1, j], seam[i-1, j+1])
-            #Adding the seam energy 
-            seamEnergy = seamEnergy + val
-            indJ = indJ + (indIncr - 2)
-    
+    for i in range(start=height - 1, stop = 0, step = -1):
+        #Converrt the value of the square behind us
+        #optimalPath[i, minJ - 1] = 1
+        #Finding the min in the seams that are above our given seam
+        seamEnergy = min(seam[i-1, minJ-1], seam[i-1, minJ], seam[i-1, minJ+1])
+        #find a way to return the j attribute of the chosen path
+        minJ = np.where(seam[i-1:,] == seamEnergy)
+        optimalPath = [i -1, minJ]
     #optimalPath[1, indJ - 1] = 1
     #optimalPath = not optimalPath
     # Delete this line after you implemented your algorithm!
@@ -185,7 +185,6 @@ def find_vertical_seam(image: np.ndarray, energy=None):
     return optimalPath
 
     # --------------------- END TODO ---------------------------
-
 
 def find_horizontal_seam(image: np.ndarray, energy=None):
     """
