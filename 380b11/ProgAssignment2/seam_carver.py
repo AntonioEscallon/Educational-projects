@@ -9,6 +9,7 @@ Instructions: Complete the sections marked with # TODO
 
 import numpy as np
 from PIL import Image
+import math
 
 # --------------------- TODO -------------------------------
 
@@ -54,31 +55,24 @@ def compute_energy(image: np.ndarray):
     # --------------------- TODO -------------------------------
 
     # Begin your work here
-    #print(image.shape[0],image.shape[1], image.shape[2])
     height = image.shape[0]
     width = image.shape[1]
     energy = np.empty((height, width))
     for i in range(height):
         for j in range(width):
             #Accounting for the edge cases. Not sure if this works tho
-            if(i == 0 or j == 0 or i == (height - 1) or j == (width -1)):
-                energy[0,j] == 1000
-                energy[i,0] == 1000
-                energy[height - 1, j] == 1000
-                energy[i, width - 1] == 1000
+            if(i == 0 or j == 0 or i == (height-1) or j == (width-1)):
+                energy[i,j] = np.abs(1000)
             else:
-                L = image[i, (j-1) % width]
-                R = image[i, (j+1) % width]
-                U = image[(i-1) % height, j]
-                D = image[(i+1) % height, j]
-            # #This part works
-            #     L = image[i, (j-1)]
-            #     R = image[i, (j+1)]
-            #     U = image[(i-1), j]
-            #     D = image[(i+1), j]
-                dx_sq = np.sum((R - L)**2)
-                dy_sq = np.sum((D - U)**2)
+                #Using the energy calculaiton here
+                Left = image[i, (j-1) % width]
+                Right = image[i, (j+1) % width]
+                Up = image[(i-1) % height, j]
+                Down = image[(i+1) % height, j]
+                dx_sq = np.sum((Right - Left)**2)
+                dy_sq = np.sum((Down - Up)**2)
                 energy[i,j] = np.sqrt(dx_sq + dy_sq)
+
     return energy
     # Delete this line after you implemented your algorithm!
 
@@ -146,45 +140,108 @@ def find_vertical_seam(image: np.ndarray, energy=None):
     #Start from the element with minimum value in the last row of S and climb up by choosing neighbors with minimum seam values. Store each step.
     #The path you have stored is the seam with minimum energy.
 
-    height = image.shape[0]
-    width = image.shape[1]
-    seam  = np.empty((height, width))
-    for i in range(height - 1):
-        for j in range(width - 1):
-            if(i == 1):
+    height = energy.shape[0]
+    width = energy.shape[1]
+    seam  = np.empty((height, width, 2))
+    minJ = 100000
+    minVal = 1000000
+    for i in range(height):
+        for j in range(width):
+            if(i == 0):
                 #Keeping all the values of the first pixel in the image
-                seam[i, j] = energy[i, j]
+                seam[i, j] = [energy[i, j], j]
+            elif(j == 0):
+                #Gotta make an error case for the last value since there isn't an extra row
+                #seam[i, j] = energy[i,j] + min(seam[i-1, j+1], seam[i-1, j])
+                if(seam[i-1, j+1][0] < seam[i-1, j][0]):
+                    seam[i, j] = [energy[i,j] + seam[i-1, j+1][0], j + 1]
+                else:
+                    seam[i, j] = [energy[i,j] + seam[i-1, j][0], j]
+            elif(j == (width - 1)):
+                #Gotta make an error case for the last value since there isn't an extra row
+                #seam[i, j] = energy[i,j] + min(seam[i-1, j-1], seam[i-1, j])
+                if(seam[i-1, j-1][0] <seam[i-1, j][0]):
+                    seam[i, j] = [energy[i,j] + seam[i-1, j-1][0], j - 1]
+                else:
+                    seam[i, j] = [energy[i,j] + seam[i-1, j][0], j]
             else:
                 #Finding the min value for the next pixel and adding that to the path. The path with the lowest value will be the one where we get the min path from
                 #We then go backwards on how we built this path. 
-                seam[i, j] = energy[i,j] + min( seam[i-1, j-1], seam[i-1, j], seam[i-1, j+1])
+                #seam[i, j] = energy[i,j] + min(seam[i-1, j-1], seam[i-1, j], seam[i-1, j+1])
+                if(seam[i-1, j+1][0] < seam[i-1, j][0] and seam[i-1, j+1][0] < seam[i-1, j-1][0]):
+                    seam[i, j] = [energy[i,j] + seam[i-1, j+1][0], j + 1]
+                elif(seam[i-1, j+1][0] > seam[i-1, j][0] and seam[i-1, j-1][0] > seam[i-1, j][0]):
+                    seam[i, j] = [energy[i,j] + seam[i-1, j][0], j]
+                else:
+                    seam[i, j] = [energy[i,j] + seam[i-1, j - 1][0], j - 1]
+            # if(i == height - 1):
+            #     if(minVal > seam[i,j]):
+            #         minVal = seam[i, j]
+            #         minJ = j
+            # if(minJ == 100000):
+            #     return
+
+    solution = np.array([math.inf, math.inf])
+    for w in range(width):
+        if(solution[0] > seam[height-1, w][0]):
+            solution = seam[height-1, w]
     
-    #Min element in the last row
-    #Getting the J values and finding the near elements of the min row
-    minVal = np.min(seam, axis = height - 1)
-    #Getting the index value of the least valuable object in the last row
-    minJ = np.argmin(seam, axis = height - 1)
-    print(minJ, 'hm')
-    #print([val, indJ])
-    seamEnergy = minVal 
-    optimalPath  = np.empty((height, width))
-
+    #Getting the min value out of the last row
+    #minJ = minHelper(seam[height - 1])
+    minJ = solution[1].astype(int)
+    #Creating an array for the optimal path. Each value should indicate the J'th index value of our path
+    optimalPath  = [0]*(height)
+    #Converting it into a numpy array because that has to be the response
+    optimalPath = np.array(optimalPath)
     #Save the Optimal Path. We backtrack our steps in order to know how we created the smallest value of the path and then getting the specific path
-    for i in range(start=height - 1, stop = 0, step = -1):
-        #Converrt the value of the square behind us
-        #optimalPath[i, minJ - 1] = 1
+    for i in range(height - 1, -1, -1):
+        #Convert the value of the square behind us
         #Finding the min in the seams that are above our given seam
-        seamEnergy = min(seam[i-1, minJ-1], seam[i-1, minJ], seam[i-1, minJ+1])
-        #find a way to return the j attribute of the chosen path
-        minJ = np.where(seam[i-1:,] == seamEnergy)
-        optimalPath = [i -1, minJ]
-    #optimalPath[1, indJ - 1] = 1
-    #optimalPath = not optimalPath
-    # Delete this line after you implemented your algorithm!
+        if(i == height - 1):
+            #We start with the minJ found above
+            optimalPath[i] = minJ
+        elif(i == 0):
+            #We can't compare the neighbors of the last element 
+            optimalPath[i] = minJ + 1
+        else:
+            #Compare each neighbor and find the min value
+            seamEnergy = min(seam[i, minJ-1][0], seam[i, minJ][0], seam[i, minJ+1][0])
+            #Return the j attribute of the chosen path and add it to the array
+            firstValue = seam[i, minJ-1][0]
+            secondValue = seam[i, minJ][0]
+            minJ = whereHelper(firstValue, secondValue, seamEnergy, minJ)
+            optimalPath[i] = minJ
 
+    print(optimalPath)
     return optimalPath
 
     # --------------------- END TODO ---------------------------
+
+def minHelper(energy: np.array):
+    minVal = 10000
+    minJ = 100000
+    height = energy.shape[0]
+    for i in range(height):
+        if (energy[i] < minVal):
+            minVal = energy[i]
+            minJ = i
+    if(minJ == 100000):
+        height = energy.shape[1]
+        for i in range(height):
+            if (energy[i] < minVal):
+                minVal = energy[i]
+                minJ = i
+    return minJ
+
+def whereHelper(firstValue, secondValue, value, minJ):
+    if(value == firstValue):
+        minJ = minJ - 1
+    elif(value == secondValue):
+        minJ = minJ
+    else:
+        minJ = minJ +1
+
+    return minJ
 
 def find_horizontal_seam(image: np.ndarray, energy=None):
     """
