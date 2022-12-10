@@ -1,6 +1,7 @@
 import csv
 import random
 import pdb
+import math
 
 
 def read_data(csv_path):
@@ -131,6 +132,94 @@ class DecisionTree:
         # build the tree!
         self.root = self.learn_tree(examples)
 
+    def entropy(self, examples, c1label):
+        ent = 0 #entropy
+        num_examples = 0 #number of examples we've looked at
+        c1 = 0 #number of examples in class 1
+        c2 = 0 #number of examples in class 2
+        for example in examples:
+            num_examples += 1
+            if (example[self.class_name] == c1label):
+                c1 += 1  
+            else:
+                c2 += 1
+    
+        pc1 = c1/num_examples #probability of class 1
+        ent -= pc1*math.log2(pc1) if pc1 > 0 else 0
+        pc2 = c2/num_examples #probability of class 2
+        ent -= pc2*math.log2(pc2) if pc2 > 0 else 0
+        return ent
+    
+    def check_uniform_examples(self, examples, c1label):
+        c1 = 0
+        c2 = 0
+        for example in examples:
+            if example[self.class_name] == c1label:
+                c1 += 1
+            else:
+                c2 += 1
+        return (c1 == 0 or c2 == 0)
+
+    def learn_tree_helper(self, examples, c1label):
+        
+        keys = examples[0].keys() 
+        info_gain = 0
+        test_attr = None
+        thresh = 0
+        left = None
+        right = None
+        miss_lt = None
+        
+        for key in keys: #for all attributes
+            if key == self.class_name or key == self.id_name: #we don't want to split over the class we're identifying or the id
+                continue
+
+            splits = [] #list of values to split on for a key, initially empty
+            samples = [] #keeps track of all those datapoints whose values for this key are not none
+            for example in examples: #for each data point
+                if example[key] == None: #if the datapoint doesn't have a value for this key, move on
+                    continue
+                splits.append(example[key]) #otherwise, add the split to list of splits to test on for that key
+                samples.append(example) #add that datapoint to list of datapoints with data for that key
+
+            for split in splits: #for the list of values to split on
+                less = [] #list of datapoints where value of that key is = than the splitting value
+                geq = [] #list of datapoints where value of that key is >= than the splitting value
+                
+                for sample in samples: #iterate over the datapoints with data for this key
+                    less.append(sample) if sample[key] < split else geq.append(sample) #separate into two lists based off of the cutoff
+
+                if len(less) < self.min_leaf_count or len(geq) < self.min_leaf_count: #if doing this split means that either leaves would have < self.min_leaf_count examples, don't split on it
+                  continue
+
+                p_ent = self.entropy(samples, c1label)
+                curr_gain = p_ent - ((len(less)/len(samples))*self.entropy(less, c1label) + (len(geq)/len(samples))*self.entropy(geq, c1label)) #get the info gain for this current split
+
+                if curr_gain > info_gain: #if this is greater than the highest info_gain value we've seen
+                    info_gain = curr_gain
+                    test_attr = key #split on it
+                    thresh = split #set the threshold to the one we just split on
+                    left = less #set the left children to the ones we've found using this split
+                    right = geq #set the right children to the ones we've found using this split
+                    miss_lt = len(left) > len(right) #if the left is larger than the right, we want it to go down the left child
+        
+        if test_attr == None: #if we never found a good attribute to split on
+            c1_name = examples[0][self.class_name] #name of the first class
+            c2_name = None #the name of the other class
+            c1 = 0 #number of datapoints in class 1
+            c2 = 0 #number of datapoints in class 2
+            for example in examples: #for all of the datpoints
+                if example[self.class_name] == c1_name: #if they belong to the first class
+                    c1 += 1 #incement the class 1 counter
+                else: #otherwise
+                    c2 += 1  #incement the class 2 counter
+                    c2_name = example[self.class_name]  #record the name of the other class
+            
+            return LeafNode(c1_name if c1 > c2 else c2_name, c1 if c1>c2 else c2, len(examples)) #return a leaf node to indicate we didn't find a good spit
+        
+        return DecisionNode(test_attr, thresh, self.learn_tree_helper(left, c1label), self.learn_tree_helper(right, c1label), miss_lt)
+
+
     def learn_tree(self, examples):
         """Build the decision tree based on entropy and information gain.
         
@@ -144,7 +233,8 @@ class DecisionTree:
         #
         # fill in the function body here!
         #
-        return None  # fix this line!
+        c1label = examples[0][self.class_name]
+        return self.learn_tree_helper(examples, c1label)
     
     def classify(self, example):
         """Perform inference on a single example.
@@ -157,7 +247,8 @@ class DecisionTree:
         #
         # fill in the function body here!
         #
-        return "medium", 0.42  # fix this line!
+        return self.root.classify(example)
+        # return "medium", 0.42  # fix this line!
 
     def __str__(self):
         """String representation of tree, calls _ascii_tree()."""
@@ -228,6 +319,10 @@ if __name__ == '__main__':
     path_to_csv = 'mass_towns_2022.csv'
     id_attr_name = 'Town'
     class_attr_name = '2022_gov'
+
+    # path_to_csv = 'basic_tree_data.csv'
+    # id_attr_name = 'id'
+    # class_attr_name = 'cls'
 
     min_examples = 10  # minimum number of examples for a leaf node
 
