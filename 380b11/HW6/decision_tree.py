@@ -131,10 +131,6 @@ class DecisionTree:
         # build the tree!
         self.root = self.learn_tree(examples)
 
-    def learn_treehelper(self, examples, thresh):
-        
-        return None
-
     def learn_tree(self, examples):
         """Build the decision tree based on entropy and information gain.
         
@@ -145,8 +141,6 @@ class DecisionTree:
         
         Returns: a DecisionNode or LeafNode representing the tree
         """
-        pdb.set_trace()
-        return 
         #
         # fill in the function body here!
         #
