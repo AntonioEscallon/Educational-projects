@@ -143,8 +143,6 @@ def find_vertical_seam(image: np.ndarray, energy=None):
     height = energy.shape[0]
     width = energy.shape[1]
     seam  = np.empty((height, width, 2))
-    minJ = 100000
-    minVal = 1000000
     for i in range(height):
         for j in range(width):
             if(i == 0):
@@ -174,20 +172,13 @@ def find_vertical_seam(image: np.ndarray, energy=None):
                     seam[i, j] = [energy[i,j] + seam[i-1, j][0], j]
                 else:
                     seam[i, j] = [energy[i,j] + seam[i-1, j - 1][0], j - 1]
-            # if(i == height - 1):
-            #     if(minVal > seam[i,j]):
-            #         minVal = seam[i, j]
-            #         minJ = j
-            # if(minJ == 100000):
-            #     return
 
     solution = np.array([math.inf, math.inf])
     for w in range(width):
         if(solution[0] > seam[height-1, w][0]):
             solution = seam[height-1, w]
     
-    #Getting the min value out of the last row
-    #minJ = minHelper(seam[height - 1])
+    #Getting the min value out of the last row\
     minJ = solution[1].astype(int)
     #Creating an array for the optimal path. Each value should indicate the J'th index value of our path
     optimalPath  = [0]*(height)
@@ -199,7 +190,7 @@ def find_vertical_seam(image: np.ndarray, energy=None):
         #Finding the min in the seams that are above our given seam
         if(i == height - 1):
             #We start with the minJ found above
-            optimalPath[i] = minJ
+            optimalPath[i] = minJ + 1
         elif(i == 0):
             #We can't compare the neighbors of the last element 
             optimalPath[i] = minJ + 1
@@ -212,26 +203,9 @@ def find_vertical_seam(image: np.ndarray, energy=None):
             minJ = whereHelper(firstValue, secondValue, seamEnergy, minJ)
             optimalPath[i] = minJ
 
-    print(optimalPath)
     return optimalPath
 
     # --------------------- END TODO ---------------------------
-
-def minHelper(energy: np.array):
-    minVal = 10000
-    minJ = 100000
-    height = energy.shape[0]
-    for i in range(height):
-        if (energy[i] < minVal):
-            minVal = energy[i]
-            minJ = i
-    if(minJ == 100000):
-        height = energy.shape[1]
-        for i in range(height):
-            if (energy[i] < minVal):
-                minVal = energy[i]
-                minJ = i
-    return minJ
 
 def whereHelper(firstValue, secondValue, value, minJ):
     if(value == firstValue):
