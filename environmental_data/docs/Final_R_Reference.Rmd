@@ -1,0 +1,273 @@
+---
+title: "Final R Reference"
+author: "Antonio Escallón"
+date: "12/23/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# R Reference Guide {.tabset .tabset-pills}
+
+
+## Loading Data and Packages {.tabset}
+
+#### Functions:
+
+### **require()**
+
+Used to load and attach add-on packages that are either part of the system or have been downloaded by the user using the install.packages() function. 
+It is designed mainly for use inside other functions and will return FALSE in addition to a warning if the package has not been downloaded. 
+
+```{r}
+require(here)
+```
+
+### **library()**
+
+Used to load and attach add-on packages that are either part of the system or have been downloaded by the user using the install.packages() function.
+It's main difference with the require function is that as opposed to being designed for internal function use, it was designed to return an error when the given package does not exists. 
+```{r}
+library("palmerpenguins")
+```
+
+### **here() and read.csv()**
+#### here():
+Powerful tool used to find project files based on the current working directory at the time when the package was loaded. In other languages, this function is known as file.path(). The simplicity of use of functions like here() is what makes r a great language for data analysis. 
+
+#### read.csv(): 
+Every strong boat needs a brilliant coxing to guide it, and that is what read.csv() is to here(). It allows for an easy and fast reading of the data passed into here and converted into a data frame. 
+All of the files passed into read.csv have to be in the form of comma separated files. 
+
+``` {r}
+ginkgo <- data.frame(read.csv(here("data","ginkgo_data_2022.csv")))
+head(ginkgo)
+```
+
+
+
+
+## Data Structures {.tabset}
+
+#### Functions:
+
+### **c()**
+
+Combines or concatenates its arguments into a vector (a 1-dimensional data structure consisting of 1 or more elements).
+
+All of the elements must be of the same type.
+I can’t combine character and numeric types in the same call to c()
+Here’s two examples using numeric and character data types:
+
+```{r}
+# Create a vector of numbers:
+num_vec  = c(1, 4, 8, 9, 13)
+```
+
+```{r}
+# Create a vector of characters:
+char_vec = c("a", "fish", "data is cool")
+```
+I can show the contents of a vector by typing the name of the vector, or using the print() function.
+
+```{r}
+# Typing the name of the vector into the console prints the contents
+num_vec
+```
+
+```{r}
+# The print() function accomplishes the same task:
+print(char_vec)
+```
+
+### **length()**
+Is able to get or set the length of provided R object for which a method has been defined.
+THe vlaue has to be a non-negative integer or double when changing the length of our object. 
+
+``` {r}
+# An example of using the length of the function with the num_vec function
+num_vec
+length(num_vec)
+
+#Or setting the length
+
+length(num_vec) <- 6
+length(num_vec)
+```
+
+### **matrix()**
+
+Function creates a matrix from the passed values in the parameters. 
+It accepts a set number of parameters, most importantly for the data, the desired number of rows, the desired number of columns. The function can infer what values it will assign for nrow or ncol from the data. If not enough elements are given in order to fill the matrix, the elements of the data will be recycled. 
+
+``` {r}
+#Converting the numeric data in vector form into a matrix. 
+num_mat <- matrix(num_vec, ncol = 2, nrow = 3)
+num_mat
+```
+
+### **data.frame()**
+Though it was alluded to earlier that here and read.csv are a power couple that are most successful when working together, they also require a final piece of the puzzle in order to create malleable data in r. The best type of object to work with (in my unbiased opinion) is a data frame. 
+
+This function will create a data frame out of the provided data. It works in a similar way to the matrix function, but it creates a more robust data structure which, as mentioned above, can be easily manipulated and replicated. 
+
+``` {r}
+#Converting the numeric data matrix into a data frame. 
+num_data <- data.frame(num_mat)
+num_data
+```
+
+
+
+## Subsetting {.tabset}
+
+### **Creating subsets of a data frame in three different ways**
+
+#### Using '$':
+
+The '$' symbol allows for a specific column to be selected in the data frame of our choice. Below we show an example.
+
+```{r}
+#If we choose to print only the notch_depth column in our data.frame
+print(ginkgo$notch_depth)
+```
+
+#### Using []:
+We can use the hard brackets in a similar manner as the '$' symbol, but we can also easily subdivide our data frame if we only want to keep certain aspects of it. 
+
+```{r}
+#If we want to only keep the data from the first 3 columns of the ginkgo data
+dat_f3 <- ginkgo[,1:3]
+head(dat_f3)
+```
+
+#### Using the subset() funciton: 
+A more powerful version of both the '$' symbol and the usage of the hard brackets. This is to be expected, since it is a function that allows for subdivisions to be more complex. 
+
+```{r}
+#Here we can show just how easy it is to subdivide our data frame using the subset() function. We use the site ID as the filtering function. 
+dat_subs <- subset(ginkgo, site_id == 3704)
+head(dat_subs)
+```
+
+
+
+## Numerical Data Exploraiton {.tabset .tabset-pills}
+
+### summary()
+This function is used to produce an output filled with explanations of the function passed in the parameter. The vlaues returned by the summary function depends on what the class of the argument is. 
+
+``` {r}
+summary(ginkgo)
+```
+
+### mean()
+Just as the name entails, this function returns the arithmetic mean of a passed R object. 
+The arithmetic mean that cannot be a null value
+
+``` {r}
+#Getting the mean of the max_width
+mean(ginkgo$max_width)
+```
+
+### sd()
+Name requires more intuition than the mean() function. This function returns the standard deviation of the R object passed as a parameter. We can use na.rm to remove the null values in the passed numeric vector. 
+
+``` {r}
+#Getting the Standard Deviation of the max width
+sd(ginkgo$max_width)
+```
+
+
+## Graphical Data Exploration {.tabset}
+
+### plot()
+Function used to plot a scatter plot with a given set of data in vector form for the x and y axis. It has the extra parameters it has allow for modifications in our plot. These parameters include: col, pch, cex, main, xlab, ylab , xlim, ylim. 
+
+``` {r}
+#Here is an example of creating a plot while using all of the provided functions
+plot(x=ginkgo$max_depth, y=ginkgo$max_width, col = topo.colors(10), ylab="Max Leaf Depth", xlab="Max Leaf Width", main="Ginkgo Trees: Max Leaf Depth vs Max Leaf Depth", pch= 0, cex=1.5, ylim=c(20,150), xlim=c(20,130))
+```
+
+### hist()
+Function that creates a histogram with the passed data. 
+
+``` {r}
+#Creating a histogram out of the penguin flipper length setting breaks every 10mm
+hist(penguins$flipper_length_mm, breaks=10, main="Penguin Flipper Length Histogram", xlab="Flipper Length in mm")
+```
+
+### boxplot() and par()
+
+#### boxplot():
+This function allows us to create a box plot of our data. By istelf it is useful, but boxplot usually don't tell us too much by themselves, but accompanied by others they can be incredibly insightful. 
+
+#### par():
+In order to make box plots more insightful, we use par to create a panel in our plot that allows for more than one graph. In order to do that, we use the mfrow= parameter which allows for us to divide a panel however we want, with the first number in our c() being the one for the rows and the second one for the number of columns.
+
+```{r}
+par(mfrow = c(2, 2))
+#Creating a normal box plot of the petiole length
+boxplot(ginkgo$petiole_length, main="Petiole Length")
+#Conditional box plot separates our numeric column data into classes according to a given value. In this case we are separating the petiole length depending on whether there are seeds present or not.
+boxplot(petiole_length~seeds_present, data=ginkgo, main="Seeds Present vs Petiole Length")
+#Creating another box plot of the max_depth of the leafs
+boxplot(ginkgo$max_depth, main="Max Leaf Depth")
+#Similar to the above conditional box plot, here we are creating a conditional box plot with the usage of max_depth column as opposed to the seeds_present
+boxplot(max_depth~seeds_present, data=ginkgo, main="Seeds Present vs Max Leaf Depth")
+```
+
+## Distribution Funcitons {.tabset}
+
+#### In the case of normal distirbution funcitons:
+The parameters of mean and sd fall under the same descriptions as the functions described above. If mean or sd are not given then it is assumed the default values of 0 and 1, respectively. 
+
+#### In the case of the binomial funcitons:
+The most important parameters are size and prob. Size is the number of trials. If size is not an integer, it will return a null value. The prob parameter accepts the probability of success of each trial. 
+
+### dnorm()
+This is the density for the normal distribution. Its first value has to be in vector of quantiles. 
+
+```{r}
+#Creatug=ng density values for all of the entries
+dnorm(ginkgo$max_depth, mean=mean(ginkgo$max_depth), sd=sd(ginkgo$max_depth))
+```
+
+### pnorm()
+This is equal to the distribution function. Its first value has to be in vector of quantiles. 
+```{r}
+#Creating distribution values for all of the entries
+pnorm(ginkgo$max_depth, mean=mean(ginkgo$max_depth), sd=sd(ginkgo$max_depth))
+```
+### qnorm()
+This is equal to the quantile function. Its first value has to be a vector of probabilities. 
+```{r}
+#Getting the quantile value for 0.5
+qnorm(0.5, mean=mean(ginkgo$max_depth), sd=sd(ginkgo$max_depth))
+```
+
+### dbinom()
+Density function for the binomial distribution.
+```{r}
+#Probability of 10 trials being successful when we have a the success trial is 0.6 and we do it 12 times
+dbinom(x=10, size=12, prob=0.6)
+```
+
+### pbinom()
+Distribution function for the binomial distribution.
+```{r}
+#The probability of 4 or fewer successes during 10 trials where the probability of success on each trial is 0.5
+pbinom(4, size=10, prob=.5)
+```
+### qbinom()
+Quantile function for the binomial distribution. 
+
+```{r}
+#The 10th quantile of a binomial distribution with 10 trials and prob of success on each trial = 0.5
+qbinom(.10, size=10, prob=.5)
+```
+
+
+
+
