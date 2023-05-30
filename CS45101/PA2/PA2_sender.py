@@ -4,6 +4,7 @@
 import sys
 import socket
 import datetime
+import time
 
 CONNECTION_TIMEOUT = 60
 
@@ -54,6 +55,15 @@ def checksum_verifier(msg):
     if calc_checksum == expected_checksum:
         return True
     return False
+
+def helperPacketSend(seq, bytes):
+    text = bytes
+    ACK = 0
+    prefix = f"{seq} {seq} {text} "
+    check = checksum(prefix)
+    packet = prefix + str(check)
+    return packet
+
 
 def start_sender(connection_ID, loss_rate=0, corrupt_rate=0, max_delay=0, transmission_timeout=60):
     """
@@ -141,41 +151,70 @@ def start_sender(connection_ID, loss_rate=0, corrupt_rate=0, max_delay=0, transm
     ##################################################
     # START YOUR RDT 3.0 SENDER IMPLEMENTATION BELOW #
     ##################################################
-    check = True
+    sent_data = ""
+    seq = 0
+    expected = 0
+    read = 0
+    terminate = 0
+    temp_data = ""
+    #While loop to account for missing messages or time delays 
+    while (terminate == 0):
+        #Reading the first 200 bytes 
+        while read < to_send_size:
+            clientSocket.settimeout(transmission_timeout)
+            read += 20 
+            #Getting the first 20 bytes of every iteration of the while loop
+            bytes = data[:20]
+            temp_data += bytes
+            #Moving the data 20 bytes further to account for the new message sent 
+            data = data[20:]
 
-    if check:
-        with open(filename, "r") as f:
-            num = 0
-            ack_state = 0
-            bytes = f.read(20)
-            read = 0
-            while read < 200:
-                read += 20 
-                data += bytes
-                prefix = f'{num} {ack_state} {bytes} '
-                text = checksum(prefix)
-                packet = f'{num} {ack_state} {bytes} {text}'
-                message = ""
-                ack_check = -1
-                while ack_check != str(num) or not checksum_verifier(message):
-                    try:
-                        clientSocket.send(packet.encode())
-                        clientSocket.settimeout(transmission_timeout)
-                        total_packet_sent +=1
-                        while (ack_check != str(num) or not checksum_verifier(message)):
-                            if(ack_state != -1 and message != ""):
-                                total_corrupted_pkt_recv +=1
-                            message = clientSocket.recv(1024).decode()
-                            total_packet_recv += 1
-                            if not message:
-                                continue
-                            ack_state = message[2]
-                    except TimeoutError:
-                        print("oopsie error")
-                        total_timeout +=1
-                num = 1-num
-                bytes = f.read(20)
-
+            if data == ""  or len(data[:to_send_size]) == len(temp_data):
+                #If we don't see any message we will add to the terminate number, which will cause the program to terminate after this cycle
+                terminate = 1 
+            
+            #Helper method to create the packet. I was getting ovewhelmed with the amount of functions here so I decided to clean it up with the helper method. No real reason why it exists except for that. 
+            packet = helperPacketSend(seq, bytes)
+            sent_data += bytes
+            #Creating an empty message function
+            message = ""
+            print(packet)
+            while True:
+                    clientSocket.send(packet.encode("utf-8"))
+                    total_packet_sent +=1
+                    try: 
+                        #Decoding the recieved message 
+                        message_recv = clientSocket.recv(1024).decode()
+                    except:
+                        #If we don't recieve a packet then we call a time out 
+                        total_timeout += 1
+                        continue
+                    total_packet_recv += 1
+                    #Check if we have the correct packet 
+                    if checksum_verifier(message_recv):
+                        #Check if seq numbers match. If they are then proceed to updated expected and seq numbers
+                        if(int(message_recv[2]) == expected):
+                            expected +=1
+                            seq +=1
+                            if(expected == 2):
+                                expected = 0
+                            if(seq == 2):
+                                seq=0
+                            break
+                        else:
+                            continue 
+                    else:
+                        #If wrong checksum then we have a corrupted package
+                        #print("Wrong checksum")
+                        total_corrupted_pkt_recv +=1
+                        continue
+            if (terminate == 1):
+                data = sent_data
+                break
+        if(terminate == 1):
+            data = sent_data
+            break
+        data = sent_data
     ########################################
     # END YOUR RDT 3.0 SENDER IMPLEMENTATION HERE #
     ########################################

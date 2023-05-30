@@ -125,29 +125,74 @@ def start_receiver(connection_ID, loss_rate=0.0, corrupt_rate=0.0, max_delay=0.0
     # START YOUR RDT 3.0 RECEIVER IMPLEMENTATION BELOW #
     ####################################################
     expected = 0
-    check = True
-    if check:
+    ack = 1
+    terminate = 0
+
+    #While loop to account for missing messages or time delays
+    while terminate == 0:
         while True: 
-            message = clientSocket.recv(1024).decode()
-            if not message:
+            recv_message = clientSocket.recv(1024).decode("utf-8")
+
+            if recv_message == "":
+                terminate = 1
                 break
-            num = message[0]
-            ack = num
-            if checksum_verifier(message) and num == str(expected):
-                data += message[4:-6]
-                expected = 1-expected
+            
+            total_packet_recv += 1
+
+            #We check if the packet is corrupted
+            if checksum_verifier(recv_message):
+                #Then we check if the packet is a duplicate by comparing sequence numbers
+                if (recv_message[0] == str(expected)):
+                    #Updating the data and the ack number
+                    data += recv_message[4:-6]
+                    ack += 1
+                    #Get ack back to 0 if previous number was 1
+                    if(ack == 2):
+                        ack = 0
+
+                    prefix = f'  {ack}                      '
+                    check = checksum(prefix)
+                    packet = prefix + str(check)
+                    #print(packet, 'HERE IS THE ANSWER')
+                    clientSocket.send(packet.encode("utf-8"))
+                    total_packet_sent +=1
+                    expected +=1
+                    #Same strategy for the expected value 
+                    if(expected == 2):
+                        expected = 0
+                #If the seq number is not what we expected then we call a duplicate 
+                else: 
+                    #print("Duplicate")
+                    prefix = prefix = f'  {ack}                      '   
+                    check = checksum(prefix)
+                    packet = prefix + str(check)
+                    clientSocket.send(packet.encode("utf-8"))
+                    total_packet_sent += 1
+            #Dealing with the possible malformation of packets from premature timeouts. 
+            elif(len(recv_message)> 30): 
+                #Procedure for malformed packages under timeout 
+                total_packet_sent +=1
+                prefix = f'  {ack}                      '
+                check = checksum(prefix)
+                packet = prefix + str(check)
+                clientSocket.send(packet.encode())
+            #Dealing with corrupted packages due to wrong checksum 
             else:
-                ack = 1 - expected
-        prefix = f' {ack}  '
-        message_checksum = checksum(prefix)
-        packet = f' {ack}   {message_checksum}'
-        clientSocket.send(packet.encode())
+                #Procedure for corrupted packages when corruption rate is turned on
+                total_packet_sent +=1
+                total_corrupted_pkt_recv += 1
+                prefix = f'  {ack}                      '
+                check = checksum(prefix)
+                packet = prefix + str(check)
+                clientSocket.send(packet.encode())
+
+        
 
     #################################################
     # END YOUR RDT 3.0 RECEIVER IMPLEMENTATION HERE #
     #################################################
 
-    # close the socket
+ # close the socket
     clientSocket.close() 
 
     # remove space at the end
@@ -172,6 +217,7 @@ def start_receiver(connection_ID, loss_rate=0.0, corrupt_rate=0.0, max_delay=0.0
 if __name__ == '__main__':
     # check arguments
     if len(sys.argv) != 5:
+        print(sys.argv)
         print("Expected \"python PA2_receiver.py <connection_id> <loss_rate> <corrupt_rate> <max_delay>\"")
         exit()
 
